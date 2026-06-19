@@ -62,9 +62,9 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 - [x] **T3.3** `economics/costing.py` — lift `cost_of` from HW2 `budget.py`, drop enforcement. **(D6)**
 - [x] **T3.4** `config/setup.json` + `config/economics.json` (priced constants w/ source+date) +
       one `config/experiments/<id>.json` template. **(D6, D8)**
-- [ ] **T3.5** `conftest.py` fixture; `scripts/check_no_hardcoded.py` (watched constant repointed —
+- [x] **T3.5** `conftest.py` fixture; `scripts/check_no_hardcoded.py` (watched constant repointed —
       needs the config from T3.4). **(PLAN §7)** *(file-size/anti-pattern scanners landed in T1.4.)*
-- [ ] **T3.6** Doc skeletons (content wiped): `SELF_GRADE.md`, `KNOWN_LIMITATIONS.md`, `COST.md`,
+- [x] **T3.6** Doc skeletons (content wiped): `SELF_GRADE.md`, `KNOWN_LIMITATIONS.md`, `COST.md`,
       `EXTENDING.md` (note QLoRA as future work), `PROMPTS.md` (fresh), `adr/` (Gatekeeper-N/A ADR,
       G-SPIKE ADR). **(D8, D9, D13)**
 
