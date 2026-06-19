@@ -80,7 +80,7 @@ def probe_logits(model, input_ids) -> str:
     try:
         with torch.no_grad():
             out = model(input_ids)
-        logits = getattr(out, "logits", out)
+        logits = out[0] if isinstance(out, tuple) else getattr(out, "logits", out)
         return f"OK shape={tuple(logits.shape)}"
     except Exception as exc:  # noqa: BLE001
         return f"FAILED {type(exc).__name__}: {exc}"
@@ -160,7 +160,7 @@ def main() -> None:
     for k, v in res.items():
         print(f"  {k:>22}: {v}")
     print("=" * 60)
-    print("cold/warm ratio >> 1 → page cache helps (model fits RAM); ~1 → it doesn't.")
+    print("cold/warm ratio >> 1 -> page cache helps (model fits RAM); ~1 -> it doesn't.")
 
 
 if __name__ == "__main__":
