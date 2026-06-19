@@ -10,18 +10,23 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · **(ref)** = PRD/PLAN an
 
 ## Phase 1 — Pre-spike bootstrap (enables the spike)
 
-- [ ] **T1.1** Port governance shell (Bucket-1 copy-as-is): `CLAUDE.md`, `Makefile`,
+- [x] **T1.1** Port governance shell (Bucket-1 copy-as-is): `CLAUDE.md`, `Makefile`,
       `.pre-commit-config.yaml`, `.gitattributes`, `.worktreeinclude`, `AUTHORS.md`,
       `docs/GIT_WORKFLOW.md`, `docs/REVIEW_PROCESS.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
-      `.github/ISSUE_TEMPLATE/` (bug/idea/limitation). **(PLAN §2, salvage Bucket 1)**
-- [ ] **T1.2** `.gitignore` + **model-weight lines** (`*.safetensors`, shard dirs, HF cache,
-      large `results/*`); `.env.example` = `HF_TOKEN` only. **(D8)**
-- [ ] **T1.3** `pyproject.toml`: keep ruff/mypy/pytest/coverage config; rewrite deps
-      (torch, transformers, accelerate, airllm, bitsandbytes, llama-cpp/ollama client, matplotlib,
-      pandas, psutil, pynvml). `uv sync`. **(salvage)**
-- [ ] **T1.4** CI `quality.yml` + generic scanners (`scripts/check_file_sizes.py`,
-      `scripts/check_anti_patterns.py`): lint + mypy --strict + pytest + file-size ≤150. Green on
-      **empty** `src/airllm_bench/` + `tests/`. **(D11, PLAN §7)**
+      `.github/ISSUE_TEMPLATE/` (bug/idea/limitation). CLAUDE.md + workflow docs **adapted** to HW5
+      (no SDK facade, Gatekeeper N/A, squash-merge, real review history). **(PLAN §2, salvage Bucket 1)**
+- [x] **T1.2** `.gitignore` + **model-weight lines** (`*.safetensors`/`*.gguf`/shard dirs/HF cache);
+      `results/` + `figures/` kept **tracked** (committed evidence); `.env.example` = `HF_TOKEN` only. **(D8)**
+- [x] **T1.3** `pyproject.toml`: kept ruff/mypy/pytest/coverage config; deps rewritten. **Core**
+      (numpy/pandas/matplotlib/psutil/nvidia-ml-py/pydantic) installed in CI; **heavy runtime**
+      (torch/transformers/accelerate/airllm/bitsandbytes/llama-cpp-python) in the `runtime` optional
+      extra — hardware-only, never in CI. `uv sync` clean. **(salvage, D11)**
+- [x] **T1.4** CI `quality.yml` + scanners (`check_file_sizes.py`, `check_anti_patterns.py`):
+      lint + mypy --strict (guarded) + pytest (guarded) + file-size ≤150. Green on **empty**
+      `src/airllm_bench/` + `tests/`. **(D11, PLAN §7)**
+- [x] **T1.5** Port adapted Claude skills (`.claude/skills/`): `commit-discipline`, `pr-discipline`,
+      `tdd-cycle`, `self-grade` (adapted to HW5); `eval-harness` (rewritten around structural evals +
+      Tier-2 evidence — no behavioural-LLM evals); `agent-debug` **dropped** (no analogue). **(governance)**
 
 **→ Phase 1 merged before any spike work.**
 
