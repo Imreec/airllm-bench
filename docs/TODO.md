@@ -77,11 +77,11 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 - [ ] **T4.2** `runners/mock.py` — canned `TokenEvent`s for wiring tests.
 - [ ] **T4.3** `harness/sampler.py` — `ResourceSampler` thread (NVML power/VRAM, psutil RSS+system),
       unit-tested with a fake clock. **(D5)**
-- [ ] **T4.4** `harness/run.py` — single-scenario `run(runner, cfg) -> RunResult`; clean-OOM capture;
+- [x] **T4.4** `harness/run.py` — single-scenario `run(runner, cfg) -> RunResult`; clean-OOM capture;
       tested against `mock`. **(PLAN §4)**
-- [ ] **T4.5** `metrics/` — TTFT/TPOT/throughput, ITL series stats, TTFT-vs-length curve, cold/warm
+- [x] **T4.5** `metrics/` — TTFT/TPOT/throughput, ITL series stats, TTFT-vs-length curve, cold/warm
       delta, perplexity from `LogitsResult`. Pure, unit-tested on fixtures. **(D4, D10)**
-- [ ] **T4.6** Structural evals + `scripts/check_raw_data.py` + mock-runner CI smoke. **(D11)**
+- [x] **T4.6** Structural evals + `scripts/check_raw_data.py` + mock-runner CI smoke. **(D11)**
 
 ---
 

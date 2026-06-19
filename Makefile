@@ -46,6 +46,7 @@ grade: lint type-check test
 	$(PYTHON) scripts/check_file_sizes.py
 	$(PYTHON) scripts/check_anti_patterns.py
 	$(PYTHON) scripts/check_no_hardcoded.py
+	$(PYTHON) scripts/check_raw_data.py
 	@echo ""
 	@echo "All quality checks passed."
 
