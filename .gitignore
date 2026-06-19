@@ -1,0 +1,85 @@
+# Secrets — NEVER commit
+.env
+.env.local
+*.key
+*.pem
+credentials.json
+secrets/
+
+# Model weights & shards — tens of GB, NEVER commit (D-constraint #13)
+*.safetensors
+*.gguf
+*.bin
+*.pt
+*.pth
+*.onnx
+models/
+shards/
+layer_shards/
+hf_cache/
+.cache/
+
+# Python bytecode & packaging artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+MANIFEST
+
+# Virtual environment (uv)
+.venv/
+venv/
+env/
+
+# uv.lock IS committed — it pins exact dependency versions for reproducibility
+
+# Runtime logs
+logs/
+*.log
+
+# NOTE: results/ and figures/ ARE committed in HW5 — the raw JSON is the source of truth
+# and figures are embedded in the README. Only scratch/large intermediates are ignored.
+results/scratch/
+figures/scratch/
+
+# IDE & OS junk
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Ruff & mypy caches
+.ruff_cache/
+.mypy_cache/
+
+# Temporary / scratch files
+tmp/
+scratch/
+*.tmp
+
+# Claude Code worktrees — parallel sessions live here, never commit them
+.claude/worktrees/
+
+# Claude Code per-machine state — NEVER commit (absolute paths / usernames leak).
+# Keep .claude/skills/ tracked — those are project-shared skill definitions.
+.claude/scheduled_tasks.lock
+.claude/settings.json
+.claude/settings.local.json
+
+# Cross-model PR-review scratch artifacts (never commit)
+*.diff
+review_payload.json
+summary_review.md

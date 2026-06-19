@@ -1,0 +1,117 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "airllm-bench"
+version = "1.00"
+description = "Benchmarking a massive LLM run locally via AirLLM + quantization: TTFT/TPOT/throughput/memory/power, economics, and a hierarchical roofline."
+readme = "README.md"
+# Capped below 3.13 deliberately: the heavy ML stack (torch/airllm/bitsandbytes) may lack
+# wheels on the newest Python (per the brief's "Do" list). The G-SPIKE confirms the exact version.
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [
+    { name = "Imree Cohen (ID: 312359284)", email = "246479960+Imreec@users.noreply.github.com" },
+    { name = "Eyal Shtinmetz (ID: 314884834)", email = "eyalshtinmetz@gmail.com" },
+]
+
+# Core deps: keyless Tier-1 analysis stack + lightweight hardware probes. CI installs these.
+dependencies = [
+    "pydantic>=2.0",
+    "numpy>=1.26",
+    "pandas>=2.2",
+    "matplotlib>=3.8",
+    "psutil>=5.9",
+    "nvidia-ml-py>=12.0",
+]
+
+# Heavy model-runtime stack — hardware-bound (Tier-2) only. Installed via
+# `uv sync --extra runtime` on the GPU box; NEVER installed in CI.
+[project.optional-dependencies]
+runtime = [
+    "torch>=2.2",
+    "transformers>=4.40",
+    "accelerate>=0.30",
+    "airllm>=2.11",
+    "bitsandbytes>=0.43",
+    "huggingface-hub>=0.23",
+    "llama-cpp-python>=0.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/airllm_bench"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM", "ANN", "RET", "PT"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN", "S101"]
+"scripts/**/*.py" = ["ANN"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["airllm_bench"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+warn_unreachable = true
+warn_redundant_casts = true
+exclude = ["tests/", "scripts/", "build/"]
+
+# Un-stubbed third-party libs — let mypy treat them as Any so the strict check passes
+# in CI without the heavy runtime stack installed.
+[[tool.mypy.overrides]]
+module = [
+    "torch.*", "transformers.*", "accelerate.*", "airllm.*", "bitsandbytes.*",
+    "llama_cpp.*", "pynvml.*", "matplotlib.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+minversion = "8.0"
+addopts = "-ra --strict-markers"
+pythonpath = ["src"]
+markers = [
+    "hardware: needs the GPU box (Tier-2) — excluded from keyless CI",
+    "slow: marks slow tests",
+]
+
+[tool.coverage.run]
+source = ["src/airllm_bench"]
+branch = true
+omit = ["**/__init__.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+    "if TYPE_CHECKING:",
+]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.100",
+    "mypy>=1.10",
+    "pre-commit>=4.0",
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "pandas-stubs>=2.2",
+    "types-psutil>=5.9",
+]
