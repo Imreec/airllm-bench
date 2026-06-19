@@ -30,11 +30,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · **(ref)** = PRD/PLAN an
 ## Phase 2 — G-SPIKE (go/no-go, throwaway scripts only) **(D1)**
 
 - [ ] **T2.1** Stack import check on **native Windows**: torch+CUDA sees the 3080 Ti; AirLLM imports;
-      bitsandbytes `4bit`/`8bit` loads a layer. (WSL2 fallback decision if it fails.)
+      bitsandbytes `4bit`/`8bit` loads a layer. **If this forces the WSL2 fallback → the memory-cap
+      requirement in T2.4 becomes mandatory before any page-cache result is valid.**
 - [ ] **T2.2** Tiny-model harness proof (Qwen2.5-0.5B/7B): streaming per-token timestamps,
       NVML VRAM/power, psutil RSS+system, JSON out — full instrumentation works end-to-end.
 - [ ] **T2.3** **One real Qwen2.5-32B token via AirLLM, timed** → replaces the decode-time estimate.
 - [ ] **T2.4** Page-cache check: does NF4 (~16 GB) stay resident across passes in 32 GB?
+      **If on WSL2:** the VM defaults to ~50% host RAM (~16 GB) — too little to cache the model, so
+      warm runs thrash the VHDX and invalidate the memory-hierarchy result. The fallback **must** ship
+      a host `.wslconfig` (`memory=28GB`) **and** keep shards on the VM's ext4 (not `/mnt/c`, to avoid
+      9p I/O distortion) before this check is meaningful. **(Antigravity review)**
 - [ ] **T2.5** Verify AirLLM exposes `logits` for a full-sequence forward pass (perplexity). **(D10)**
 
 **🚦 G-SPIKE decision (recorded in an ADR):** lock model (32B vs 14B), size the matrix
@@ -81,7 +86,11 @@ until green.
 - [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit, shards → **NVMe**.
 - [ ] **T5.3** `runners/llamacpp.py` — GGUF Q4_K_M (+Q8), `n_gpu_layers` offload. **(D3)**
 - [ ] **T5.4** `cli`/`scripts` matrix orchestrator: per-scenario **subprocess isolation** +
-      **OS page-cache flush** before cold. **(PLAN §4, PR-review fix)**
+      **OS page-cache flush** before cold. **Fail-loud privilege guard**
+      (`ctypes.windll.shell32.IsUserAnAdmin()`) — Standby-List flush needs Administrator; abort with an
+      elevation message if not, since a silent Access-Denied would corrupt "cold" data. **Verify**
+      cached memory actually dropped post-flush (belt-and-suspenders). **(PLAN §4, PR-review fixes,
+      Antigravity review)**
 - [ ] **T5.5** Execute the full matrix; commit raw JSON to `results/` as evidence + env metadata.
       **(D11 Tier-2)**
 
