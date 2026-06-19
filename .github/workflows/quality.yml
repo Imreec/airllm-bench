@@ -1,0 +1,57 @@
+name: Quality
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      # Core + dev only — the heavy `runtime` extra (torch/airllm/bitsandbytes) is
+      # hardware-bound (Tier-2) and never installed in CI. Keeps Tier-1 fast and keyless.
+      - name: Install dependencies (core + dev, no runtime extra)
+        run: uv sync
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        run: |
+          if [ -d src/airllm_bench ] && [ -n "$(find src -name '*.py' 2>/dev/null)" ]; then
+            uv run mypy src/
+          else
+            echo "src/ not yet populated — mypy skipped (activates once src/ has code)"
+          fi
+
+      - name: File-size check
+        run: uv run python scripts/check_file_sizes.py
+
+      - name: Anti-pattern check
+        run: uv run python scripts/check_anti_patterns.py
+
+      - name: Tests with coverage
+        run: |
+          if [ -d tests ] && [ -n "$(find tests -name 'test_*.py' 2>/dev/null)" ]; then
+            uv run pytest -m "not hardware" --cov=src --cov-report=xml --cov-fail-under=90
+          else
+            echo "No tests yet — pytest skipped (activates once tests/ has tests)"
+          fi

@@ -1,0 +1,5 @@
+# Gitignored files copied into each new `claude -w` worktree.
+# Uses .gitignore syntax. The .env holds HF_TOKEN (Hugging Face model downloads);
+# without it, a fresh worktree session can't pull gated/rate-limited models.
+.env
+.env.local

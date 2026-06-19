@@ -1,0 +1,11 @@
+# Normalize all line endings to LF in the repository
+* text=auto eol=lf
+
+# Force binary files to never be line-ending converted
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+
+# Mark generated lockfile to avoid review noise
+uv.lock binary linguist-generated=true
