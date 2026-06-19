@@ -100,6 +100,8 @@ def main() -> None:
             "WARNING: AIRLLM_SHARDS not set — AirLLM uses its default cache (verify it's the NVMe!)."
         )
     compression = None if args.compression == "none" else args.compression
+    if shards:
+        Path(shards).mkdir(parents=True, exist_ok=True)  # AirLLM check_space needs it to exist
 
     from airllm import AutoModel
 
