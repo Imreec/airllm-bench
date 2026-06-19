@@ -34,22 +34,23 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · **(ref)** = PRD/PLAN an
 
 ## Phase 2 — G-SPIKE (go/no-go, throwaway scripts only) **(D1)**
 
-- [ ] **T2.1** Stack import check on **native Windows**: torch+CUDA sees the 3080 Ti; AirLLM imports;
+- [x] **T2.1** Stack import check on **native Windows**: torch+CUDA sees the 3080 Ti; AirLLM imports;
       bitsandbytes `4bit`/`8bit` loads a layer. **If this forces the WSL2 fallback → the memory-cap
       requirement in T2.4 becomes mandatory before any page-cache result is valid.**
-- [ ] **T2.2** Tiny-model harness proof (Qwen2.5-0.5B/7B): streaming per-token timestamps,
+- [x] **T2.2** Tiny-model harness proof (Qwen2.5-0.5B/7B): streaming per-token timestamps,
       NVML VRAM/power, psutil RSS+system, JSON out — full instrumentation works end-to-end.
-- [ ] **T2.3** **One real Qwen2.5-32B token via AirLLM, timed** → replaces the decode-time estimate.
-- [ ] **T2.4** Page-cache check: does NF4 (~16 GB) stay resident across passes in 32 GB?
+- [x] **T2.3** **One real Qwen2.5-32B token via AirLLM, timed** → replaces the decode-time estimate.
+- [x] **T2.4** Page-cache check: does NF4 (~16 GB) stay resident across passes in 32 GB?
       **If on WSL2:** the VM defaults to ~50% host RAM (~16 GB) — too little to cache the model, so
       warm runs thrash the VHDX and invalidate the memory-hierarchy result. The fallback **must** ship
       a host `.wslconfig` (`memory=28GB`) **and** keep shards on the VM's ext4 (not `/mnt/c`, to avoid
       9p I/O distortion) before this check is meaningful. **(Antigravity review)**
-- [ ] **T2.5** Verify AirLLM exposes `logits` for a full-sequence forward pass (perplexity). **(D10)**
+- [x] **T2.5** Verify AirLLM exposes `logits` for a full-sequence forward pass (perplexity). **(D10)**
 
-**🚦 G-SPIKE decision (recorded in an ADR):** lock model (32B vs 14B), size the matrix
-(`max_new_tokens`, prompts, reps), confirm native-Windows vs WSL2. **(PRD §7)** No further code
-until green.
+**🚦 G-SPIKE decision — recorded in [ADR 0001](adr/0001-go-no-go-spike.md):** GO on **native
+Windows**; **Qwen2.5-32B-Instruct** locked; 4-bit ≈ **20 s/token** (FP16 ~8 min/token, to measure in
+Phase 5); dependency pins locked (torch `cu124`, transformers `<4.43`, optimum `<2`, sentencepiece).
+Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ---
 

@@ -32,9 +32,11 @@ dependencies = [
 # Install on the GPU box: `uv sync --extra runtime`.
 runtime = [
     "torch>=2.2",
-    # <4.49: airllm -> optimum.bettertransformer hard-requires transformers<4.49 (G-SPIKE finding).
-    # Fine for Qwen2.5 (supported since 4.37).
-    "transformers>=4.44,<4.49",
+    # <4.43: transformers 4.43 moved RoPE position_embeddings to the model level and passes
+    # them down to layers; AirLLM drives layers itself with the OLDER self-contained-rotary API,
+    # so >=4.43 crashes mid-generation ("cos, sin = position_embeddings" on None). G-SPIKE finding.
+    # 4.42.x still supports Qwen2.5 (since 4.37) and satisfies the <4.49 bettertransformer cap.
+    "transformers>=4.40,<4.43",
     "accelerate>=0.30",
     "airllm>=2.11",
     "bitsandbytes>=0.43",
