@@ -10,15 +10,18 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · **(ref)** = PRD/PLAN an
 
 ## Phase 1 — Pre-spike bootstrap (enables the spike)
 
-- [ ] **T1.1** Port governance shell: `CLAUDE.md`, `Makefile`, `.pre-commit-config.yaml`,
-      `.gitattributes`. **(PLAN §2)**
+- [ ] **T1.1** Port governance shell (Bucket-1 copy-as-is): `CLAUDE.md`, `Makefile`,
+      `.pre-commit-config.yaml`, `.gitattributes`, `.worktreeinclude`, `AUTHORS.md`,
+      `docs/GIT_WORKFLOW.md`, `docs/REVIEW_PROCESS.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
+      `.github/ISSUE_TEMPLATE/` (bug/idea/limitation). **(PLAN §2, salvage Bucket 1)**
 - [ ] **T1.2** `.gitignore` + **model-weight lines** (`*.safetensors`, shard dirs, HF cache,
       large `results/*`); `.env.example` = `HF_TOKEN` only. **(D8)**
 - [ ] **T1.3** `pyproject.toml`: keep ruff/mypy/pytest/coverage config; rewrite deps
       (torch, transformers, accelerate, airllm, bitsandbytes, llama-cpp/ollama client, matplotlib,
       pandas, psutil, pynvml). `uv sync`. **(salvage)**
-- [ ] **T1.4** CI `quality.yml`: lint + mypy --strict + pytest + file-size ≤150. Green on **empty**
-      `src/airllm_bench/` + `tests/`. **(D11, PLAN §7)**
+- [ ] **T1.4** CI `quality.yml` + generic scanners (`scripts/check_file_sizes.py`,
+      `scripts/check_anti_patterns.py`): lint + mypy --strict + pytest + file-size ≤150. Green on
+      **empty** `src/airllm_bench/` + `tests/`. **(D11, PLAN §7)**
 
 **→ Phase 1 merged before any spike work.**
 
@@ -48,8 +51,8 @@ until green.
 - [ ] **T3.3** `economics/costing.py` — lift `cost_of` from HW2 `budget.py`, drop enforcement. **(D6)**
 - [ ] **T3.4** `config/setup.json` + `config/economics.json` (priced constants w/ source+date) +
       one `config/experiments/<id>.json` template. **(D6, D8)**
-- [ ] **T3.5** `conftest.py` fixture; `scripts/check_no_hardcoded.py` (watched constant repointed),
-      `check_file_sizes.py`. **(PLAN §7)**
+- [ ] **T3.5** `conftest.py` fixture; `scripts/check_no_hardcoded.py` (watched constant repointed —
+      needs the config from T3.4). **(PLAN §7)** *(file-size/anti-pattern scanners landed in T1.4.)*
 - [ ] **T3.6** Doc skeletons (content wiped): `SELF_GRADE.md`, `KNOWN_LIMITATIONS.md`, `COST.md`,
       `EXTENDING.md` (note QLoRA as future work), `PROMPTS.md` (fresh), `adr/` (Gatekeeper-N/A ADR,
       G-SPIKE ADR). **(D8, D9, D13)**
