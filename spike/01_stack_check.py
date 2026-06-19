@@ -66,11 +66,10 @@ def main() -> None:
     print("G-SPIKE 01 — stack check (native Windows)")
     print("=" * 64)
     cuda = check_torch()
-    for name in ("transformers", "accelerate", "airllm"):
-        check_import(name)
+    imports = {name: check_import(name) for name in ("transformers", "accelerate", "airllm")}
     bnb_ok = check_bitsandbytes_4bit()
     print("-" * 64)
-    verdict = "GO" if (cuda and bnb_ok) else "NO-GO (see FAILs above)"
+    verdict = "GO" if (cuda and bnb_ok and imports["airllm"]) else "NO-GO (see FAILs above)"
     print(f"  T2.1 verdict: {verdict}")
     print("=" * 64)
 

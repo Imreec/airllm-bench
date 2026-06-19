@@ -32,11 +32,18 @@ dependencies = [
 # Install on the GPU box: `uv sync --extra runtime`.
 runtime = [
     "torch>=2.2",
-    "transformers>=4.40",
+    # <4.49: airllm -> optimum.bettertransformer hard-requires transformers<4.49 (G-SPIKE finding).
+    # Fine for Qwen2.5 (supported since 4.37).
+    "transformers>=4.44,<4.49",
     "accelerate>=0.30",
     "airllm>=2.11",
     "bitsandbytes>=0.43",
     "huggingface-hub>=0.23",
+    # airllm imports optimum.bettertransformer, removed in optimum 2.0 (G-SPIKE finding).
+    "optimum>=1.14,<2",
+    # airllm tokenizer deps not pulled transitively (G-SPIKE finding).
+    "sentencepiece>=0.2",
+    "protobuf>=4.0",
 ]
 # The llama.cpp competitor (Phase 5) — isolated so its build-fragile wheel can NEVER block
 # the AirLLM spike. May be swapped for an external Ollama install if it won't build on Windows.
@@ -44,6 +51,17 @@ runtime = [
 llamacpp = [
     "llama-cpp-python>=0.2",
 ]
+
+# torch must come from the CUDA index — PyPI serves CPU-only wheels on Windows, which
+# defeats the whole experiment (G-SPIKE 01 caught torch==*+cpu). cu124 wheels run fine on
+# the box's CUDA-13.1-capable driver. Only applies when the `runtime` extra is installed.
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/airllm_bench"]
