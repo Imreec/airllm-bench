@@ -1,0 +1,37 @@
+{
+  "version": "1.00",
+  "_note": "All assumptions are documented constants (D8: no live pricing). Each price carries a source + retrieved date. Values are initial estimates to be finalized in Phase 6 economics.",
+  "api": {
+    "qwen2.5-32b": {
+      "input_per_mtok_usd": 0.18,
+      "output_per_mtok_usd": 0.18,
+      "source": "OpenRouter (Qwen2.5-32B-Instruct) — verify before Phase 6",
+      "retrieved": "2026-06-19"
+    }
+  },
+  "electricity": {
+    "tariff_usd_per_kwh": 0.16,
+    "source": "Israel residential average — verify",
+    "retrieved": "2026-06-19"
+  },
+  "hardware_power": {
+    "gpu_tdp_w": 350,
+    "cpu_tdp_w": 105
+  },
+  "capex": {
+    "scope": "gpu_only",
+    "gpu_cost_usd": 1200,
+    "amortization_years": 3
+  },
+  "cloud_gpu": {
+    "usd_per_hour": 0.40,
+    "source": "representative rented-GPU rate — verify",
+    "retrieved": "2026-06-19"
+  },
+  "caching": {
+    "cached_input_discount": 0.1
+  },
+  "utilization": {
+    "duty_cycle": 0.3
+  }
+}

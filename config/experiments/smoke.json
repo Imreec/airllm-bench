@@ -1,0 +1,10 @@
+{
+  "version": "1.00",
+  "_note": "Keyless smoke scenario: the mock runner exercises the harness wiring with no model, no GPU (D11 CI smoke test).",
+  "runner": "mock",
+  "quant": "none",
+  "prompt": "What is virtual memory?",
+  "max_new_tokens": 4,
+  "phase": "cold",
+  "reps": 1
+}
