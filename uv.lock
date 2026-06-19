@@ -58,12 +58,14 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+llamacpp = [
+    { name = "llama-cpp-python" },
+]
 runtime = [
     { name = "accelerate" },
     { name = "airllm" },
     { name = "bitsandbytes" },
     { name = "huggingface-hub" },
-    { name = "llama-cpp-python" },
     { name = "torch" },
     { name = "transformers" },
 ]
@@ -86,7 +88,7 @@ requires-dist = [
     { name = "airllm", marker = "extra == 'runtime'", specifier = ">=2.11" },
     { name = "bitsandbytes", marker = "extra == 'runtime'", specifier = ">=0.43" },
     { name = "huggingface-hub", marker = "extra == 'runtime'", specifier = ">=0.23" },
-    { name = "llama-cpp-python", marker = "extra == 'runtime'", specifier = ">=0.2" },
+    { name = "llama-cpp-python", marker = "extra == 'llamacpp'", specifier = ">=0.2" },
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "nvidia-ml-py", specifier = ">=12.0" },
@@ -96,7 +98,7 @@ requires-dist = [
     { name = "torch", marker = "extra == 'runtime'", specifier = ">=2.2" },
     { name = "transformers", marker = "extra == 'runtime'", specifier = ">=4.40" },
 ]
-provides-extras = ["runtime"]
+provides-extras = ["runtime", "llamacpp"]
 
 [package.metadata.requires-dev]
 dev = [

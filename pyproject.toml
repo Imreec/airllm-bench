@@ -26,9 +26,10 @@ dependencies = [
     "nvidia-ml-py>=12.0",
 ]
 
-# Heavy model-runtime stack — hardware-bound (Tier-2) only. Installed via
-# `uv sync --extra runtime` on the GPU box; NEVER installed in CI.
+# Heavy model-runtime stack — hardware-bound (Tier-2) only. NEVER installed in CI.
 [project.optional-dependencies]
+# AirLLM path — what the G-SPIKE and the AirLLM/baseline runners need.
+# Install on the GPU box: `uv sync --extra runtime`.
 runtime = [
     "torch>=2.2",
     "transformers>=4.40",
@@ -36,6 +37,11 @@ runtime = [
     "airllm>=2.11",
     "bitsandbytes>=0.43",
     "huggingface-hub>=0.23",
+]
+# The llama.cpp competitor (Phase 5) — isolated so its build-fragile wheel can NEVER block
+# the AirLLM spike. May be swapped for an external Ollama install if it won't build on Windows.
+# Install: `uv sync --extra runtime --extra llamacpp`.
+llamacpp = [
     "llama-cpp-python>=0.2",
 ]
 
@@ -53,6 +59,7 @@ ignore = ["E501"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN", "S101"]
 "scripts/**/*.py" = ["ANN"]
+"spike/**/*.py" = ["ANN"]  # throwaway go/no-go scripts — not production code
 
 [tool.ruff.lint.isort]
 known-first-party = ["airllm_bench"]
