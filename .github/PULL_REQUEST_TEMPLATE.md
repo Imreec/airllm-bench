@@ -26,7 +26,7 @@
 - [ ] No secrets / hardcoded values introduced
 - [ ] README updated if user-visible behavior changed
 - [ ] TODO items checked off
-- [ ] If figures changed: regenerated and committed to `assets/`
+- [ ] If figures changed: regenerated from `results/` and committed to `figures/`
 - [ ] Conventional commit format
 - [ ] Pre-commit hooks ran clean
 - [ ] PROMPTS.md updated with the prompt that drove this work
@@ -39,7 +39,8 @@ Read your own diff in the GitHub PR view as if reviewing someone else's code. Ve
 - [ ] Code matches the linked PRD specification
 - [ ] No `NotImplementedError` placeholders
 - [ ] No mock classes shadowing real imports
-- [ ] No `/mnt/`, `/tmp/`, or `~/` paths in committed files
+- [ ] No `/mnt/`, `/tmp/`, `~/`, or `C:\Users\` absolute paths in committed files
+- [ ] No model weights (`*.safetensors` / `*.gguf` / shards) committed
 - [ ] Tests cover edge cases, not just the happy path
 - [ ] Docstrings on every new public function/class
 - [ ] CI is green (status check passing)

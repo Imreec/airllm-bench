@@ -24,7 +24,7 @@ labels: limitation
 
 - [ ] P0 - must fix before submission
 - [ ] P1 - high priority but acceptable to ship
-- [ ] P2 - acceptable as-is for HW1
+- [ ] P2 - acceptable as-is for HW5
 
 
 ## Workaround

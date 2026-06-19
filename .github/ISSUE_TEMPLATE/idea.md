@@ -22,4 +22,4 @@ labels: idea
 
 ## Out of scope?
 
-<!-- is this for HW1 or a follow-up? -->
+<!-- in scope now, or a follow-up / docs/EXTENDING.md item? -->
