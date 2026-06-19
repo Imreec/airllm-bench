@@ -44,4 +44,9 @@ repos:
         entry: uv run python scripts/check_anti_patterns.py
         language: system
         pass_filenames: false
-      # check-no-hardcoded is added in Phase 3 (T3.5), once config + the watched constant exist.
+
+      - id: check-no-hardcoded
+        name: Check no hardcoded model repo id in src/
+        entry: uv run python scripts/check_no_hardcoded.py
+        language: system
+        pass_filenames: false
