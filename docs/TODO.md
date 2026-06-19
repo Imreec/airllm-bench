@@ -34,22 +34,23 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · **(ref)** = PRD/PLAN an
 
 ## Phase 2 — G-SPIKE (go/no-go, throwaway scripts only) **(D1)**
 
-- [ ] **T2.1** Stack import check on **native Windows**: torch+CUDA sees the 3080 Ti; AirLLM imports;
+- [x] **T2.1** Stack import check on **native Windows**: torch+CUDA sees the 3080 Ti; AirLLM imports;
       bitsandbytes `4bit`/`8bit` loads a layer. **If this forces the WSL2 fallback → the memory-cap
       requirement in T2.4 becomes mandatory before any page-cache result is valid.**
-- [ ] **T2.2** Tiny-model harness proof (Qwen2.5-0.5B/7B): streaming per-token timestamps,
+- [x] **T2.2** Tiny-model harness proof (Qwen2.5-0.5B/7B): streaming per-token timestamps,
       NVML VRAM/power, psutil RSS+system, JSON out — full instrumentation works end-to-end.
-- [ ] **T2.3** **One real Qwen2.5-32B token via AirLLM, timed** → replaces the decode-time estimate.
-- [ ] **T2.4** Page-cache check: does NF4 (~16 GB) stay resident across passes in 32 GB?
+- [x] **T2.3** **One real Qwen2.5-32B token via AirLLM, timed** → replaces the decode-time estimate.
+- [x] **T2.4** Page-cache check: does NF4 (~16 GB) stay resident across passes in 32 GB?
       **If on WSL2:** the VM defaults to ~50% host RAM (~16 GB) — too little to cache the model, so
       warm runs thrash the VHDX and invalidate the memory-hierarchy result. The fallback **must** ship
       a host `.wslconfig` (`memory=28GB`) **and** keep shards on the VM's ext4 (not `/mnt/c`, to avoid
       9p I/O distortion) before this check is meaningful. **(Antigravity review)**
-- [ ] **T2.5** Verify AirLLM exposes `logits` for a full-sequence forward pass (perplexity). **(D10)**
+- [x] **T2.5** Verify AirLLM exposes `logits` for a full-sequence forward pass (perplexity). **(D10)**
 
-**🚦 G-SPIKE decision (recorded in an ADR):** lock model (32B vs 14B), size the matrix
-(`max_new_tokens`, prompts, reps), confirm native-Windows vs WSL2. **(PRD §7)** No further code
-until green.
+**🚦 G-SPIKE decision — recorded in [ADR 0001](adr/0001-go-no-go-spike.md):** GO on **native
+Windows**; **Qwen2.5-32B-Instruct** locked; 4-bit ≈ **20 s/token** (FP16 ~8 min/token, to measure in
+Phase 5); dependency pins locked (torch `cu124`, transformers `<4.43`, optimum `<2`, sentencepiece).
+Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ---
 
@@ -86,9 +87,13 @@ until green.
 
 ## Phase 5 — Real runners + Tier-2 measured runs (hardware-bound)
 
-- [ ] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** (`device_map={"":0}`), expected clean OOM
-      at load. **(D3, PR-review fix)**
-- [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit, shards → **NVMe**.
+- [ ] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** `device_map={"":0}` **+
+      `low_cpu_mem_usage=True`** (NOT `.to("cuda")`, which stages 64 GB in 32 GB host RAM → pagefile);
+      expected clean VRAM OOM at load. **(D3, PR-review fixes — ADR 0001)**
+- [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit; **pre-create the
+      shards dir**; **logits via `out[0]`** (forward returns a tuple). **Disk policy (ADR 0001):**
+      `HF_HOME` → D:; shards on C:; **one compression level's shards at a time** (create→run→delete
+      before the next) so C: never holds >1 set. **(G-SPIKE findings)**
 - [ ] **T5.3** `runners/llamacpp.py` — GGUF Q4_K_M (+Q8), `n_gpu_layers` offload. **(D3)**
 - [ ] **T5.4** `cli`/`scripts` matrix orchestrator: per-scenario **subprocess isolation** +
       **OS page-cache flush** before cold. **Fail-loud privilege guard**

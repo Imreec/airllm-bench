@@ -26,18 +26,44 @@ dependencies = [
     "nvidia-ml-py>=12.0",
 ]
 
-# Heavy model-runtime stack — hardware-bound (Tier-2) only. Installed via
-# `uv sync --extra runtime` on the GPU box; NEVER installed in CI.
+# Heavy model-runtime stack — hardware-bound (Tier-2) only. NEVER installed in CI.
 [project.optional-dependencies]
+# AirLLM path — what the G-SPIKE and the AirLLM/baseline runners need.
+# Install on the GPU box: `uv sync --extra runtime`.
 runtime = [
     "torch>=2.2",
-    "transformers>=4.40",
+    # <4.43: transformers 4.43 moved RoPE position_embeddings to the model level and passes
+    # them down to layers; AirLLM drives layers itself with the OLDER self-contained-rotary API,
+    # so >=4.43 crashes mid-generation ("cos, sin = position_embeddings" on None). G-SPIKE finding.
+    # 4.42.x still supports Qwen2.5 (since 4.37) and satisfies the <4.49 bettertransformer cap.
+    "transformers>=4.40,<4.43",
     "accelerate>=0.30",
     "airllm>=2.11",
     "bitsandbytes>=0.43",
     "huggingface-hub>=0.23",
+    # airllm imports optimum.bettertransformer, removed in optimum 2.0 (G-SPIKE finding).
+    "optimum>=1.14,<2",
+    # airllm tokenizer deps not pulled transitively (G-SPIKE finding).
+    "sentencepiece>=0.2",
+    "protobuf>=4.0",
+]
+# The llama.cpp competitor (Phase 5) — isolated so its build-fragile wheel can NEVER block
+# the AirLLM spike. May be swapped for an external Ollama install if it won't build on Windows.
+# Install: `uv sync --extra runtime --extra llamacpp`.
+llamacpp = [
     "llama-cpp-python>=0.2",
 ]
+
+# torch must come from the CUDA index — PyPI serves CPU-only wheels on Windows, which
+# defeats the whole experiment (G-SPIKE 01 caught torch==*+cpu). cu124 wheels run fine on
+# the box's CUDA-13.1-capable driver. Only applies when the `runtime` extra is installed.
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/airllm_bench"]
@@ -53,6 +79,7 @@ ignore = ["E501"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["ANN", "S101"]
 "scripts/**/*.py" = ["ANN"]
+"spike/**/*.py" = ["ANN"]  # throwaway go/no-go scripts — not production code
 
 [tool.ruff.lint.isort]
 known-first-party = ["airllm_bench"]

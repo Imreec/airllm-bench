@@ -1,11 +1,12 @@
-.PHONY: install install-runtime test test-fast lint format type-check grade clean help
+.PHONY: install install-runtime install-llamacpp test test-fast lint format type-check grade clean help
 
 PYTHON := uv run python
 
 help:
 	@echo "Available commands:"
 	@echo "  make install         Install core + dev deps (keyless Tier-1; what CI uses)"
-	@echo "  make install-runtime Install the heavy model-runtime extra (GPU box / Tier-2)"
+	@echo "  make install-runtime Install the AirLLM model-runtime extra (GPU box / Tier-2)"
+	@echo "  make install-llamacpp Add the llama.cpp competitor extra (Phase 5; build-fragile)"
 	@echo "  make test            Run tests with coverage (excludes hardware-marked tests)"
 	@echo "  make test-fast       Run tests without coverage (faster)"
 	@echo "  make lint            Run ruff linter + format check (no auto-fix)"
@@ -20,6 +21,9 @@ install:
 
 install-runtime:
 	uv sync --extra runtime
+
+install-llamacpp:
+	uv sync --extra runtime --extra llamacpp
 
 test:
 	$(PYTHON) -m pytest -m "not hardware" --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=90

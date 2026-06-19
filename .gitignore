@@ -45,6 +45,9 @@ logs/
 results/scratch/
 figures/scratch/
 
+# Spike run outputs — throwaway go/no-go artifacts
+spike/out/
+
 # IDE & OS junk
 .vscode/
 .idea/
