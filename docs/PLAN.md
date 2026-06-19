@@ -58,14 +58,20 @@ class Runner(Protocol):
     name: str
     def load(self, cfg: ExperimentConfig) -> None: ...          # may raise on OOM (baseline)
     def stream(self, prompt: str, max_new_tokens: int) -> Iterator[TokenEvent]: ...
-    def logits(self, input_ids: Sequence[int]) -> Tensor: ...    # one forward pass (perplexity)
+    def logits(self, text: str) -> LogitsResult: ...            # native-tokenize + one forward pass
     def unload(self) -> None: ...
 ```
 
 - `TokenEvent` = `{token_id, text, t_monotonic}` — emitted per token so the harness timestamps
   TTFT (first event) and the ITL series (gaps between events). **No total-time ÷ tokens anywhere.**
 - `stream()` is the only generation path; greedy/temperature-0 fixed in the runner (D4).
-- `logits()` exists for perplexity (D10); the spike (D1e) verifies the AirLLM wrapper supports it.
+- `logits(text)` does its **own native tokenization** and returns `LogitsResult{token_ids, logits}`
+  (D10). Passing HF `input_ids` to the llama.cpp runner would assume HF↔GGUF tokenizer parity and
+  silently corrupt its perplexity, so each runtime tokenizes itself. **Cross-runtime** perplexity
+  comparison is only valid when token counts match on the eval text (Qwen HF vs GGUF align closely;
+  any divergence is disclosed). Spike (D1e) verifies AirLLM exposes logits.
+- **`ExperimentConfig` describes exactly ONE scenario** — one prompt, one prompt-length, one `phase`
+  (cold | warm). The length × cold/warm matrix is orchestrated *outside* the harness (§4).
 
 **Implementations:**
 | Runner | Loads via | Quant | Notes |
@@ -80,17 +86,24 @@ A 4th `mock` runner (canned `TokenEvent`s) exists for the keyless CI harness-wir
 
 ## 4. The harness + resource sampler
 
-`harness.run(runner, cfg) -> RunResult` is the single entry every measured run passes through (D4, D5):
+`harness.run(runner, cfg) -> RunResult` executes **exactly one scenario** (one prompt-length, one
+`phase`) and emits **one** `RunResult` — so the harness and the scalar schema align (D4, D5):
 
 1. Start a **`ResourceSampler`** background thread sampling on one monotonic clock:
    NVML GPU power (mW) + NVML VRAM used, psutil process RSS, psutil system used/cached.
 2. `runner.load(cfg)` — wrap to capture a clean OOM into the result (baseline) rather than crash.
-3. For each prompt-length in the sweep (~32/256/1024) × {cold, warm}: drive `runner.stream()`,
-   record every `TokenEvent`.
+3. Drive `runner.stream()` for the single configured prompt, recording every `TokenEvent`.
 4. Stop sampler; compute peak VRAM, peak RSS, peak system mem, and **integrate** power → GPU energy.
 5. Emit one `RunResult` JSON line via the JSONL `StructuredLogger` to `results/<exp_id>.jsonl`.
 
-Cold = first touch of a fresh process; warm = immediate repeat (D4 page-cache contrast).
+**Matrix orchestration lives outside the harness** (in `cli`/`scripts`), because a true *cold* run
+needs an empty OS page cache that an in-process loop cannot provide — the first pass would warm the
+cache and corrupt every later "cold" reading. So the orchestrator runs **each scenario in an isolated
+subprocess**, and before a `cold` scenario it **explicitly flushes the OS page cache** (Windows:
+`EmptyStandbyList`/RAMMap CLI — documented in the repro instructions), then runs the paired `warm`
+scenario immediately after on the now-populated cache. **Cold** = flushed-cache fresh process;
+**warm** = the populated-cache repeat (D4 page-cache contrast). Process isolation also cleanly bounds
+the baseline OOM and each run's peak-memory accounting.
 
 ### `RunResult` data contract (the JSON schema everything downstream reads)
 ```jsonc
