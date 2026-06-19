@@ -68,6 +68,12 @@ Scenarios 2–4 are a **within-runtime quant sweep** (same algorithm, only bit-w
 scenario 5 is a **cross-runtime systems comparison** at "4-bit-class." These are labeled
 distinctly — the quant schemes (bitsandbytes NF4/INT8 vs GGUF K-quants) are **not** apples-to-apples.
 
+**Baseline allocation (scenario 1):** force GPU-only placement (`device_map={"":0}` / `.to("cuda")`),
+**never** `device_map="auto"`. Under `auto`, `accelerate` deliberately spreads layers GPU→CPU→disk
+and the Windows pagefile absorbs the overflow — replacing the clean instant `OutOfMemoryError` with
+indefinite NVMe thrashing and defeating the "yields no tokens" baseline. The clean OOM is verified
+explicitly.
+
 ### D4 — Theory-revealing instrumentation (FR-METRICS)
 The single harness every run passes through must:
 - Derive **TTFT and TPOT from per-token streaming timestamps**, never total-time ÷ tokens.
@@ -98,10 +104,13 @@ The single harness every run passes through must:
 ### D7 — Hierarchical roofline as the centerpiece (FR-ROOFLINE)
 Build the **textbook GPU roofline first** (compute ceiling + HBM ~912 GB/s diagonal) to validate
 the llama.cpp/GPU prefill (compute-bound) and decode (memory-bound) points against theory. Then
-extend to a **hierarchical multi-ceiling roofline** (compute → HBM → PCIe → NVMe) and place
-**AirLLM decode on the NVMe diagonal** (~200× below the silicon roof). Operating points computed
-from measured throughput + known param count, **with the arithmetic shown**. This chart is the
-report's unifying figure.
+extend to a **hierarchical multi-ceiling roofline** (compute → HBM → PCIe → NVMe) and place each path
+on the ceiling that actually binds it: **AirLLM FP16** (doesn't fit RAM) and **AirLLM NF4 cold** on
+the **NVMe diagonal** (~200× below the silicon roof), but **AirLLM NF4 warm** — whose ~16 GB working
+set fits the 32 GB OS page cache — **climbs to the PCIe/RAM diagonal**, since reads come from cache
+and bypass the disk. That upward shift of the *same tool* as quantization pulls the working set under
+RAM is itself a clean memory-hierarchy result. Operating points computed from measured throughput +
+known param count, **with the arithmetic shown**. This chart is the report's unifying figure.
 
 ### D8 — No live pricing; Gatekeeper N/A (FR-CONFIG)
 No live API calls of any kind. **API prices are documented constants in `economics.json`** (each
