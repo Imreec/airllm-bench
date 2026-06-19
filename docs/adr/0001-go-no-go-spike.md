@@ -46,10 +46,22 @@ size, and native-Windows vs WSL2.
 
 ### Disk plan (corrects an earlier optimistic assumption)
 AirLLM writes **compression-specific shards** (4-bit set = 18 GB), **not** a reusable FP16 set. So
-FP16/Q8/Q4 each write their own shards (≈62/31/18 GB) on top of the ~62 GB HF download. On C: (NVMe,
-~195 GB free at start) we manage with: delete the ~62 GB HF download cache once a shard set exists
-(runtime reads shards, not the original — **verify** before deleting), and/or relocate the HF cache to
-D: (HDD, 1.5 TB) since it's read once during sharding. Recorded for the Phase-5 orchestrator.
+FP16/Q8/Q4 each write their own shards (≈62/31/18 GB) on top of the ~62 GB HF download — ~173 GB if
+accumulated, against ~195 GB free on C:. A near-full OS NVMe risks a hard system crash (not a clean
+failure), so **the Phase-5 orchestrator MUST NOT accumulate all shard sets on C: at once** (PR #5
+cross-model review).
+
+**Mandatory Phase-5 disk policy:**
+1. **`HF_HOME` → D:** (the HDD) — the original safetensors are read only once per compression level
+   during sharding, so the slow drive is fine there; frees ~62 GB on the NVMe.
+2. **One shard set on C: at a time** — create → run → **delete** that compression level's shards
+   before sharding the next. Shards are regenerable from the HF cache; the committed **evidence is the
+   results JSON**, not the shards. So C: never holds more than ~62 GB (one FP16 set).
+3. **Baseline headroom + correct load path** — the `baseline_hf` FP16 OOM run must load **GPU-only via
+   `device_map={"":0}` with `low_cpu_mem_usage=True`** (NOT `.to("cuda")`, which would stage all 64 GB
+   in 32 GB host RAM → pagefile). GPU-only makes it OOM on VRAM cleanly without a host-RAM/pagefile
+   spill; with policy (1)+(2) C: also stays far from full, so even a residual pagefile bump can't
+   suffocate the drive.
 
 ## Consequences / follow-ups
 

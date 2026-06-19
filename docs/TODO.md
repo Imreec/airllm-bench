@@ -87,9 +87,13 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ## Phase 5 — Real runners + Tier-2 measured runs (hardware-bound)
 
-- [ ] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** (`device_map={"":0}`), expected clean OOM
-      at load. **(D3, PR-review fix)**
-- [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit, shards → **NVMe**.
+- [ ] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** `device_map={"":0}` **+
+      `low_cpu_mem_usage=True`** (NOT `.to("cuda")`, which stages 64 GB in 32 GB host RAM → pagefile);
+      expected clean VRAM OOM at load. **(D3, PR-review fixes — ADR 0001)**
+- [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit; **pre-create the
+      shards dir**; **logits via `out[0]`** (forward returns a tuple). **Disk policy (ADR 0001):**
+      `HF_HOME` → D:; shards on C:; **one compression level's shards at a time** (create→run→delete
+      before the next) so C: never holds >1 set. **(G-SPIKE findings)**
 - [ ] **T5.3** `runners/llamacpp.py` — GGUF Q4_K_M (+Q8), `n_gpu_layers` offload. **(D3)**
 - [ ] **T5.4** `cli`/`scripts` matrix orchestrator: per-scenario **subprocess isolation** +
       **OS page-cache flush** before cold. **Fail-loud privilege guard**
