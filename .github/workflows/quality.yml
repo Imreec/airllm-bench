@@ -51,6 +51,9 @@ jobs:
       - name: No-hardcoded check
         run: uv run python scripts/check_no_hardcoded.py
 
+      - name: Raw-data backing check
+        run: uv run python scripts/check_raw_data.py
+
       - name: Tests with coverage
         run: |
           if [ -d tests ] && [ -n "$(find tests -name 'test_*.py' 2>/dev/null)" ]; then
