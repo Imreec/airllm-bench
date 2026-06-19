@@ -56,11 +56,11 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ## Phase 3 — Post-spike carry-over
 
-- [ ] **T3.1** `shared/config.py` + `config_models.py` — versioned, fail-loud (`ConfigVersionError`),
+- [x] **T3.1** `shared/config.py` + `config_models.py` — versioned, fail-loud (`ConfigVersionError`),
       trimmed to HW5 schema. **(D8, PLAN §6)**
-- [ ] **T3.2** `shared/logging_setup.py` — JSONL `StructuredLogger` (lifted, secret-redaction kept).
-- [ ] **T3.3** `economics/costing.py` — lift `cost_of` from HW2 `budget.py`, drop enforcement. **(D6)**
-- [ ] **T3.4** `config/setup.json` + `config/economics.json` (priced constants w/ source+date) +
+- [x] **T3.2** `shared/logging_setup.py` — JSONL `StructuredLogger` (lifted, secret-redaction kept).
+- [x] **T3.3** `economics/costing.py` — lift `cost_of` from HW2 `budget.py`, drop enforcement. **(D6)**
+- [x] **T3.4** `config/setup.json` + `config/economics.json` (priced constants w/ source+date) +
       one `config/experiments/<id>.json` template. **(D6, D8)**
 - [ ] **T3.5** `conftest.py` fixture; `scripts/check_no_hardcoded.py` (watched constant repointed —
       needs the config from T3.4). **(PLAN §7)** *(file-size/anti-pattern scanners landed in T1.4.)*
