@@ -19,5 +19,14 @@
     "hf_home": "D:/hf_cache",
     "results_dir": "results",
     "figures_dir": "figures"
+  },
+  "runners": {
+    "baseline_hf": { "device": 0 },
+    "airllm": { "device": "cuda" },
+    "llamacpp": {
+      "_note": "gguf_path + n_gpu_layers set during T5.5 prep once the GGUF is downloaded; n_gpu_layers tuned to what fits the 12 GB card.",
+      "gguf_path": "C:/models/Qwen2.5-32B-Instruct-Q4_K_M.gguf",
+      "n_gpu_layers": 20
+    }
   }
 }

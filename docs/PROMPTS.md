@@ -69,3 +69,11 @@ temp=0, EOS/budget stop; `logits_all` eval for perplexity; partial GPU offload v
 Using the low-level `generate` API gives real token ids, so the earlier streaming-token-id caveat
 dissolved — no placeholder needed. Tests inject a fake `llama_cpp`; keyless, 100% coverage. Completes
 the three real runners (T5.1–T5.3); next is the T5.4 matrix orchestrator.
+
+### PR #13 — Phase 5 (T5.4a): scenario worker + runner factory
+"Execute one scenario from config, keyless." → `runners/factory.py` (build the right runner with
+device/shards/gguf/n_gpu_layers injected from `setup.json`) + `harness/scenario.py` (`run_scenario`:
+build → run → append one RunResult JSONL line; sampler/env injected so it stays keyless). Config grows
+a `runners` section + an optional `prompt_tokens` override (whitespace estimate when absent). Mock-runner
+tested, 100% coverage. T5.4b adds the hardware glue (NVML reader, env, cold-cache flush + admin guard,
+the subprocess matrix orchestrator, `cli bench`).

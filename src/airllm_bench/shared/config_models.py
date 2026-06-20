@@ -9,7 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from airllm_bench.shared.config import load_versioned
 
@@ -58,6 +58,9 @@ class SetupConfig(BaseModel):
     hardware: HardwareConfig
     model: ModelConfig
     paths: PathsConfig
+    # Per-runner constructor params the factory injects (device / gguf_path / n_gpu_layers).
+    # Kept loose (data, not code) so a runtime knob lands without a schema change.
+    runners: dict[str, Any] = Field(default_factory=dict)
     raw_data: dict[str, Any]
 
     @classmethod
@@ -79,6 +82,9 @@ class ExperimentConfig(BaseModel):
     runner: str  # baseline_hf | airllm | llamacpp | mock
     quant: str  # none | int8 | nf4 | q4_k_m | q8_0
     prompt: str
+    # Native token count, pinned by the matrix sizer when known; the worker falls back
+    # to a keyless whitespace estimate when absent (kept honest in the report).
+    prompt_tokens: int | None = None
     max_new_tokens: int = 8
     phase: str = "cold"  # cold | warm
     reps: int = 1
