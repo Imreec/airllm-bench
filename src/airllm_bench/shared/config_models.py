@@ -61,6 +61,9 @@ class SetupConfig(BaseModel):
     # Per-runner constructor params the factory injects (device / gguf_path / n_gpu_layers).
     # Kept loose (data, not code) so a runtime knob lands without a schema change.
     runners: dict[str, Any] = Field(default_factory=dict)
+    # Cold-cache flush: the standby-list tool command + the minimum freed-MB the flush
+    # must achieve to count as a genuine cold cache (ADR 0001). Empty = warm-only runs.
+    cold_flush: dict[str, Any] = Field(default_factory=dict)
     raw_data: dict[str, Any]
 
     @classmethod

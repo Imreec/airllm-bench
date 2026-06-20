@@ -28,5 +28,10 @@
       "gguf_path": "C:/models/Qwen2.5-32B-Instruct-Q4_K_M.gguf",
       "n_gpu_layers": 20
     }
+  },
+  "cold_flush": {
+    "_note": "EmptyStandbyList.exe (Sysinternals RAMMap companion) flushes the Windows Standby List; needs Administrator. min_rise_mb = the least freed memory that proves a real cold cache.",
+    "command": ["C:/tools/EmptyStandbyList.exe", "standbylist"],
+    "min_rise_mb": 2000
   }
 }

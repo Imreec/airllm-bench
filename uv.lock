@@ -55,6 +55,7 @@ dependencies = [
     { name = "pandas" },
     { name = "psutil" },
     { name = "pydantic" },
+    { name = "tqdm" },
 ]
 
 [package.optional-dependencies]
@@ -102,6 +103,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0" },
     { name = "sentencepiece", marker = "extra == 'runtime'", specifier = ">=0.2" },
     { name = "torch", marker = "extra == 'runtime'", specifier = ">=2.2", index = "https://download.pytorch.org/whl/cu124" },
+    { name = "tqdm", specifier = ">=4.66" },
     { name = "transformers", marker = "extra == 'runtime'", specifier = ">=4.40,<4.43" },
 ]
 provides-extras = ["runtime", "llamacpp"]
