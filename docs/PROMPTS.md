@@ -127,3 +127,11 @@ gate was wrong on Windows — the Standby List counts toward `available`, so emp
 the available read / `min_rise_mb`); `build_cold_flush` now = require-admin → RAMMap `-Et` (exit 0 still
 fails loud). Cold-ness is evidenced by the cold/warm timing delta (ADR 0001). Repointed config to
 `RAMMap64.exe -accepteula -Et`; documented as L-07. Caught by the operator's pre-flight test — 90 tests.
+
+### PR #20 — Phase 5 (T5.5): capture generation-time errors + drop len1024
+"The 1024-token sweep crashed: tensor a (1024) must match tensor b (512)." → AirLLM's default
+`max_seq_len=512` rejects a 1024-token prompt, and the harness only wrapped *load* errors, so the
+crash killed the subprocess and lost the scenario. `harness/run.py` now also captures *generation*-time
+failures into `ok=False` (protecting the ~70-min FP16 runs); `mock.py` gains a `stream_error` to test it.
+Dropped the `len1024` config (the 40/64/256 points already show AirLLM's TTFT is streaming-bound);
+documented as L-08. 92 tests.

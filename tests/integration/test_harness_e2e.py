@@ -58,6 +58,26 @@ def test_clean_oom_is_captured_not_raised(
     assert result.runtime_s is not None
 
 
+def test_generation_error_is_captured_not_raised(
+    experiment_config_data: dict[str, Any], write_config: Callable[..., Path]
+) -> None:
+    """A failure mid-stream (e.g. AirLLM's seq-len limit) is recorded, not crashed."""
+    exp = _exp(experiment_config_data, write_config)
+    result = run(
+        MockRunner(stream_error="tensor size mismatch"),
+        exp,
+        exp_id="genfail",
+        model="m",
+        param_count=1,
+        prompt_tokens=0,
+        clock=_seq_clock(),
+    )
+    assert not result.ok
+    assert "tensor size mismatch" in (result.error or "")
+    assert result.ttft_s is None
+    assert result.runtime_s is not None
+
+
 def test_oom_still_captures_resource_peaks(
     experiment_config_data: dict[str, Any], write_config: Callable[..., Path]
 ) -> None:

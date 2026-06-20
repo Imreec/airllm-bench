@@ -55,8 +55,7 @@ uv run airllm-bench bench --experiments `
   config/experiments/airllm-nf4-warm.json `
   config/experiments/airllm-nf4-warm-r2.json `
   config/experiments/airllm-nf4-len64.json `
-  config/experiments/airllm-nf4-len256.json `
-  config/experiments/airllm-nf4-len1024.json
+  config/experiments/airllm-nf4-len256.json   # length sweep caps at 256 (AirLLM max_seq_len=512, L-08)
 
 # Batch C — llama.cpp competitor (warm + rep); no cold here → --no-flush is fine
 uv run airllm-bench bench --no-flush --experiments `

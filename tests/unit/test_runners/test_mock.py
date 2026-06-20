@@ -47,6 +47,12 @@ def test_stream_respects_max_new_tokens() -> None:
     assert events[0].text == "a"
 
 
+def test_stream_error_raises_on_iteration() -> None:
+    runner = MockRunner(stream_error="kernel died mid-generation")
+    with pytest.raises(RuntimeError, match="mid-generation"):
+        list(runner.stream("hi", 4))
+
+
 def test_logits_returns_result() -> None:
     res = MockRunner().logits("hi")
     assert isinstance(res, LogitsResult)
