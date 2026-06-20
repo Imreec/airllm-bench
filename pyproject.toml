@@ -30,6 +30,10 @@ dependencies = [
     "tqdm>=4.66",
 ]
 
+# Console entrypoint for the matrix driver (T5.4): `airllm-bench bench ...`.
+[project.scripts]
+airllm-bench = "airllm_bench.cli:main"
+
 # Heavy model-runtime stack — hardware-bound (Tier-2) only. NEVER installed in CI.
 [project.optional-dependencies]
 # AirLLM path — what the G-SPIKE and the AirLLM/baseline runners need.
