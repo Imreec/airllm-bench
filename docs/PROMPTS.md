@@ -40,3 +40,19 @@ logits tuple). Result: GO, native Windows, 32B @ 4-bit ≈ 20 s/token (ADR 0001)
 
 ### PR #7 — Phase 3 checkers + docs
 "Port `check_no_hardcoded` + `conftest`; seed doc skeletons + Gatekeeper-N/A ADR." → this PR.
+
+### PR #8 — Phase 4 part 1: runner contract
+"Build the runner contract + wiring fixtures (keyless)." → `runners/protocol.py` (`Runner` Protocol,
+`TokenEvent`, `LogitsResult`), `harness/result.py` (`RunResult`), `runners/mock.py`, `harness/sampler.py`
+(`ResourceSampler`, fake-clock tested). No GPU, no key.
+
+### PR #9 — Phase 4 part 2: harness + metrics
+"Wire the one-scenario harness + the pure analysis metrics + structural evals." → `harness/run.py`
+(one scenario → one `RunResult`, clean-OOM capture), `metrics/` (timing/aggregate/quality, perplexity),
+structural evals + `check_raw_data.py` + the mock-runner CI smoke test.
+
+### PR #10 — Phase 5 (T5.1): baseline_hf runner
+"Build the three real runners as thin adapters, unit-tested keyless by mocking torch/airllm." → first
+runner: `runners/baseline_hf.py` (FP16 GPU-only `device_map={"":0}`, expected clean VRAM OOM) + the
+shared `runners/hf_decode.py` (greedy decode + forward-logits, DRY for the AirLLM runner). Tests inject
+fake torch/transformers via `sys.modules` so CI stays keyless. Also backfilled the PR #8/#9 prompt log.
