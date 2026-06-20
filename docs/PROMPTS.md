@@ -104,3 +104,11 @@ prompt_tokens pinned by tokenizing with the real Qwen tokenizer. `docs/RUNBOOK_T
 disk choreography (C: NVMe for shards+GGUF, D: HDD for the HF cache only; one shard set at a time;
 pre-shard before cold so sharding doesn't warm the cache; elevated shell for the flush) + the batch
 commands. Adds the `airllm-bench` console entrypoint. Keyless; 91 tests green.
+
+### PR #17 — Phase 5 (T5.5 enablement): llama.cpp CUDA DLL shim
+"Make the CUDA llama.cpp wheel load on the box." → during T5.5 prep the PyPI `llama-cpp-python` proved
+CPU-only, so swapped in the cu124 prebuilt wheel (0.3.4); its `ggml-cuda.dll` couldn't find the CUDA
+runtime DLLs. `runners/llamacpp.py` now adds torch's bundled `torch/lib` (which ships cudart/cublas
+cu124) to the DLL search path before importing `llama_cpp` — guarded `if sys.platform == "win32"` so
+Linux mypy/CI stays clean. Verified on hardware: GPU offload True, 4 real tokens generated, logits
+5×152064 for perplexity. Keyless; mypy clean on `--platform linux` and `win32`; 92 tests.

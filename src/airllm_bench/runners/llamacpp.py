@@ -13,11 +13,32 @@ each runtime tokenizes natively, never sharing input ids (PLAN §3).
 
 from __future__ import annotations
 
+import os
+import sys
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 from airllm_bench.runners.protocol import LogitsResult, TokenEvent
 from airllm_bench.shared.config_models import ExperimentConfig
+
+
+def _ensure_cuda_dll_path() -> None:
+    """Make the CUDA llama.cpp wheel's runtime DLLs discoverable on Windows.
+
+    The prebuilt ``llama-cpp-python`` CUDA wheel ships ``ggml-cuda.dll`` but relies on the
+    CUDA runtime (``cudart64_12``/``cublas64_12``/...), which torch's ``cu124`` install already
+    bundles under ``torch/lib``. Adding that dir to the DLL search path lets ``ggml-cuda`` load
+    without a separate CUDA-toolkit install. No-op off Windows / when torch is absent.
+    """
+    if sys.platform == "win32":  # pragma: no cover
+        try:
+            import torch
+        except ImportError:
+            return
+        lib = Path(torch.__file__).parent / "lib"
+        if lib.is_dir():
+            os.add_dll_directory(str(lib))
 
 
 class LlamaCppRunner:
@@ -32,6 +53,7 @@ class LlamaCppRunner:
 
     def load(self, cfg: ExperimentConfig) -> None:  # cfg: contract-required; quant set by the GGUF
         """Construct the Llama context; ``logits_all`` is on so perplexity can read logits."""
+        _ensure_cuda_dll_path()
         from llama_cpp import Llama
 
         self._llm = Llama(
