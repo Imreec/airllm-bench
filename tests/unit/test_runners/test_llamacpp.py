@@ -9,11 +9,16 @@ from typing import Any
 
 import pytest
 
-from airllm_bench.runners.llamacpp import LlamaCppRunner
+from airllm_bench.runners.llamacpp import LlamaCppRunner, _ensure_cuda_dll_path
 from airllm_bench.runners.protocol import LogitsResult, Runner, TokenEvent
 from airllm_bench.shared.config_models import ExperimentConfig
 
 from ._fakes import fake_llama_cpp
+
+
+def test_ensure_cuda_dll_path_is_safe_noop() -> None:
+    """No-op off Windows (the CI path); never raises so load() can always call it."""
+    assert _ensure_cuda_dll_path() is None
 
 
 def _cfg(write_config: Callable[..., Path], **over: Any) -> ExperimentConfig:

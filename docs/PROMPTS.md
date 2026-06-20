@@ -105,9 +105,17 @@ disk choreography (C: NVMe for shards+GGUF, D: HDD for the HF cache only; one sh
 pre-shard before cold so sharding doesn't warm the cache; elevated shell for the flush) + the batch
 commands. Adds the `airllm-bench` console entrypoint. Keyless; 91 tests green.
 
-### PR — Phase 5 (T5.5): capture resource peaks on the OOM path
+### PR #17 — Phase 5 (T5.5 enablement): llama.cpp CUDA DLL shim
+"Make the CUDA llama.cpp wheel load on the box." → during T5.5 prep the PyPI `llama-cpp-python` proved
+CPU-only, so swapped in the cu124 prebuilt wheel (0.3.4); its `ggml-cuda.dll` couldn't find the CUDA
+runtime DLLs. `runners/llamacpp.py` now adds torch's bundled `torch/lib` (which ships cudart/cublas
+cu124) to the DLL search path before importing `llama_cpp` — guarded `if sys.platform == "win32"` so
+Linux mypy/CI stays clean. Verified on hardware: GPU offload True, 4 real tokens generated, logits
+5×152064 for perplexity. Keyless; mypy clean on `--platform linux` and `win32`; 92 tests.
+
+### PR #18 — Phase 5 (T5.5): capture resource peaks on the OOM path
 "The baseline OOM came back with peak_vram_mb=null." → `harness/run.py` now attaches the sampler's
 resource peaks (peak VRAM / RSS / system / energy) on the failure path too, not just on success — a
 clean OOM is itself a resource event, and peak VRAM at the wall is the capacity-wall evidence (D3).
-Found while running the real baseline scenario during T5.5. Keyless test on the OOM+sampler path; 92
-tests, mypy clean (linux + win32).
+Found while running the real baseline scenario during T5.5 (peak_vram≈12.16 GB, the card maxed).
+Keyless test on the OOM+sampler path; 92 tests, mypy clean (linux + win32).
