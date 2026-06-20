@@ -103,7 +103,7 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
       here (don't rely on it transitively via `transformers`) for scenario progress — in **core** if
       this orchestrator is exercised by the keyless mock-runner smoke test (T4.6), else in the
       `runtime` extra. **(PLAN §4, PR-review fixes, Antigravity review)**
-- [ ] **T5.5** Execute the full matrix; commit raw JSON to `results/` as evidence + env metadata.
+- [x] **T5.5** Execute the full matrix; commit raw JSON to `results/` as evidence + env metadata.
       **(D11 Tier-2)**
 
 ---

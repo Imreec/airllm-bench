@@ -135,3 +135,12 @@ crash killed the subprocess and lost the scenario. `harness/run.py` now also cap
 failures into `ok=False` (protecting the ~70-min FP16 runs); `mock.py` gains a `stream_error` to test it.
 Dropped the `len1024` config (the 40/64/256 points already show AirLLM's TTFT is streaming-bound);
 documented as L-08. 92 tests.
+
+### PR #21 — Phase 5 (T5.5): the Tier-2 measured results
+"Run the matrix on the box and commit the evidence." → 12 `results/*.jsonl` RunResult rows measured on
+the RTX 3080 Ti: AirLLM 4-bit/8-bit/FP16 cold+warm (the headline cold/warm contrast, run with the
+**paired protocol** after the split approach was found to contaminate warm via cross-model page-cache),
+the 4-bit length sweep, the llama.cpp Q4 competitor, and the baseline FP16 OOM. The story is clean and
+monotonic: warm speedup 2.26× (4-bit, fits RAM) → 1.07× (8-bit) → 1.02× (FP16, exceeds RAM); TPOT and
+perplexity both ordered by precision. `results/README.md` documents the matrix + env. Closes T5.5 —
+Phase 5 complete; Phase 6 (economics/roofline/plotting) consumes these keylessly.
