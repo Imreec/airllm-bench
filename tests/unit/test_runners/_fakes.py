@@ -119,3 +119,46 @@ def fake_airllm(record: dict[str, Any] | None = None) -> ModuleType:
 
     mod.AutoModel = SimpleNamespace(from_pretrained=_from_pretrained)  # type: ignore[attr-defined]
     return mod
+
+
+class FakeLlama:
+    """A llama-cpp-python ``Llama`` stand-in: token-by-token generate + logits_all eval."""
+
+    def __init__(
+        self, model_path: str, n_gpu_layers: int = 0, logits_all: bool = False, verbose: bool = True
+    ) -> None:
+        self.model_path = model_path
+        self.n_gpu_layers = n_gpu_layers
+        self.logits_all = logits_all
+        self._evaled: list[int] = []
+
+    def tokenize(self, text: bytes) -> list[int]:
+        return [b % VOCAB for b in text][:3] or [1]
+
+    def detokenize(self, ids: list[int]) -> bytes:
+        return bytes(65 + (i % VOCAB) for i in ids)
+
+    def token_eos(self) -> int:
+        return 999
+
+    def generate(self, tokens: list[int], temp: float = 0.0) -> Any:  # noqa: ANN401
+        yield from (1, 2, 3, 4, 5)
+        yield self.token_eos()  # generate() never stops on its own; runner breaks on EOS
+
+    def reset(self) -> None:
+        self._evaled = []
+
+    def eval(self, tokens: list[int]) -> None:
+        self._evaled = list(tokens)
+
+    @property
+    def eval_logits(self) -> list[list[float]]:
+        n = len(self._evaled)
+        return [[float((i + j) % VOCAB) for j in range(VOCAB)] for i in range(n)]
+
+
+def fake_llama_cpp() -> ModuleType:
+    """A stand-in ``llama_cpp`` module exposing the ``Llama`` class."""
+    mod = ModuleType("llama_cpp")
+    mod.Llama = FakeLlama  # type: ignore[attr-defined]
+    return mod

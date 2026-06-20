@@ -62,3 +62,10 @@ fake torch/transformers via `sys.modules` so CI stays keyless. Also backfilled t
 `cfg.quant` → `compression` none/8bit/4bit, pre-creates the shards dir for AirLLM's `check_space`,
 logits from the forward tuple `out[0]`). Reuses `hf_decode`; tests inject a fake `airllm` module and
 capture `from_pretrained` kwargs to assert the compression mapping. Keyless, 100% coverage.
+
+### PR #12 — Phase 5 (T5.3): llamacpp runner
+"Build the llama.cpp GGUF competitor." → `runners/llamacpp.py` (token-by-token `Llama.generate` at
+temp=0, EOS/budget stop; `logits_all` eval for perplexity; partial GPU offload via `n_gpu_layers`).
+Using the low-level `generate` API gives real token ids, so the earlier streaming-token-id caveat
+dissolved — no placeholder needed. Tests inject a fake `llama_cpp`; keyless, 100% coverage. Completes
+the three real runners (T5.1–T5.3); next is the T5.4 matrix orchestrator.

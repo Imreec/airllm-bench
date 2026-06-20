@@ -94,7 +94,7 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
       shards dir**; **logits via `out[0]`** (forward returns a tuple). **Disk policy (ADR 0001):**
       `HF_HOME` → D:; shards on C:; **one compression level's shards at a time** (create→run→delete
       before the next) so C: never holds >1 set. **(G-SPIKE findings)**
-- [ ] **T5.3** `runners/llamacpp.py` — GGUF Q4_K_M (+Q8), `n_gpu_layers` offload. **(D3)**
+- [x] **T5.3** `runners/llamacpp.py` — GGUF Q4_K_M (+Q8), `n_gpu_layers` offload. **(D3)**
 - [ ] **T5.4** `cli`/`scripts` matrix orchestrator: per-scenario **subprocess isolation** +
       **OS page-cache flush** before cold. **Fail-loud privilege guard**
       (`ctypes.windll.shell32.IsUserAnAdmin()`) — Standby-List flush needs Administrator; abort with an
