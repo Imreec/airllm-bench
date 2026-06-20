@@ -20,9 +20,16 @@ class MockRunner:
 
     name = "mock"
 
-    def __init__(self, tokens: list[str] | None = None, *, load_error: str | None = None) -> None:
+    def __init__(
+        self,
+        tokens: list[str] | None = None,
+        *,
+        load_error: str | None = None,
+        stream_error: str | None = None,
+    ) -> None:
         self._tokens = tokens if tokens is not None else list(_DEFAULT_TOKENS)
         self._load_error = load_error
+        self._stream_error = stream_error
         self.loaded = False
 
     def load(self, cfg: ExperimentConfig) -> None:
@@ -32,7 +39,9 @@ class MockRunner:
         self.loaded = True
 
     def stream(self, prompt: str, max_new_tokens: int) -> Iterator[TokenEvent]:
-        """Yield up to ``max_new_tokens`` canned tokens."""
+        """Yield up to ``max_new_tokens`` canned tokens, or raise to simulate a mid-gen failure."""
+        if self._stream_error is not None:
+            raise RuntimeError(self._stream_error)
         for i, text in enumerate(self._tokens[:max_new_tokens]):
             yield TokenEvent(token_id=i, text=text)
 

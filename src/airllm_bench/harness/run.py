@@ -56,10 +56,13 @@ def _measure(runner: Runner, exp: ExperimentConfig, clock: Callable[[], float]) 
     except Exception as exc:  # noqa: BLE001 — capture a clean OOM as a result, not a crash
         return _Core(ok=False, error=f"{type(exc).__name__}: {exc}", runtime_s=clock() - t0)
     t_gen = clock()
-    token_times = [clock() for _ in runner.stream(exp.prompt, exp.max_new_tokens)]
+    try:
+        token_times = [clock() for _ in runner.stream(exp.prompt, exp.max_new_tokens)]
+        ppl = _safe_perplexity(runner, exp.prompt)
+        runner.unload()
+    except Exception as exc:  # noqa: BLE001 — a generation-time failure is a result, not a crash
+        return _Core(ok=False, error=f"{type(exc).__name__}: {exc}", runtime_s=clock() - t0)
     timing = compute_timing(t_gen, token_times)
-    ppl = _safe_perplexity(runner, exp.prompt)
-    runner.unload()
     return _Core(
         ok=True,
         error=None,
