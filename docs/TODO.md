@@ -87,7 +87,7 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ## Phase 5 — Real runners + Tier-2 measured runs (hardware-bound)
 
-- [ ] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** `device_map={"":0}` **+
+- [x] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** `device_map={"":0}` **+
       `low_cpu_mem_usage=True`** (NOT `.to("cuda")`, which stages 64 GB in 32 GB host RAM → pagefile);
       expected clean VRAM OOM at load. **(D3, PR-review fixes — ADR 0001)**
 - [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit; **pre-create the
