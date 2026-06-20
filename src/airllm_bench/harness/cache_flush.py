@@ -11,6 +11,7 @@ read) is injectable, so CI tests this without elevation or the external tool.
 from __future__ import annotations
 
 import subprocess
+import sys
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any
 
@@ -22,6 +23,10 @@ class NotElevatedError(PermissionError):
 
 
 def _windows_is_admin() -> bool:  # pragma: no cover — Windows-elevation-only, never runs in CI
+    # sys.platform guard so mypy on Linux CI doesn't flag ctypes.windll (win32-only);
+    # the inverted check keeps mypy's per-platform narrowing clean on both OSes.
+    if sys.platform != "win32":
+        return False
     import ctypes
 
     return bool(ctypes.windll.shell32.IsUserAnAdmin())
