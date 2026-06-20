@@ -24,6 +24,10 @@ dependencies = [
     "matplotlib>=3.8",
     "psutil>=5.9",
     "nvidia-ml-py>=12.0",
+    # Scenario-matrix progress bar. In CORE (not the runtime extra) because the keyless
+    # mock-runner orchestrator smoke test imports it; declared explicitly, not relied on
+    # transitively via transformers (T5.4, Antigravity review).
+    "tqdm>=4.66",
 ]
 
 # Heavy model-runtime stack — hardware-bound (Tier-2) only. NEVER installed in CI.
@@ -101,7 +105,7 @@ exclude = ["tests/", "scripts/", "build/"]
 [[tool.mypy.overrides]]
 module = [
     "torch.*", "transformers.*", "accelerate.*", "airllm.*", "bitsandbytes.*",
-    "llama_cpp.*", "pynvml.*", "matplotlib.*",
+    "llama_cpp.*", "pynvml.*", "matplotlib.*", "tqdm.*",
 ]
 ignore_missing_imports = true
 

@@ -85,3 +85,13 @@ import, fakes injected in tests) + `harness/env_info.py` (`collect_env`: os/pyth
 best-effort so missing pieces are "" not errors). Caught an env-dependent test (the dev box has a real
 GPU, so NVML succeeds locally) → forced the absent path with `sys.modules[name]=None`. 100% coverage.
 T5.4c adds the cold-cache flush + admin guard + the subprocess matrix orchestrator + `cli bench`.
+
+### PR #15 — Phase 5 (T5.4c): matrix orchestrator + cold-cache flush + cli
+"Drive the cold/warm matrix with subprocess isolation." → `harness/cache_flush.py` (fail-loud
+`require_admin` for the Standby-List flush, `flush_standby_list`, `verify_cache_dropped`,
+`build_cold_flush`), `harness/orchestrator.py` (`run_matrix`: flush before each cold scenario, spawn
+each in a fresh subprocess, `tqdm`), `harness/scenario_main.py` (subprocess entrypoint wiring the NVML
+sampler + env into the keyless worker), and a thin `cli.py` (`bench`). `tqdm` declared in CORE (the
+keyless orchestrator smoke test imports it). OS-specific bits all injected → 100% coverage on every new
+module; only the Windows admin-check + `__main__` shims are pragma-excluded. Completes T5.4 — Phase 5
+is now code-complete; T5.5 is the at-the-keyboard Tier-2 run.
