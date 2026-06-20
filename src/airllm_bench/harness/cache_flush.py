@@ -23,13 +23,17 @@ class NotElevatedError(PermissionError):
 
 
 def _windows_is_admin() -> bool:  # pragma: no cover — Windows-elevation-only, never runs in CI
-    # sys.platform guard so mypy on Linux CI doesn't flag ctypes.windll (win32-only);
-    # the inverted check keeps mypy's per-platform narrowing clean on both OSes.
-    if sys.platform != "win32":
-        return False
-    import ctypes
+    # ctypes.windll is win32-only. Keeping it INSIDE the `== "win32"` block (not a
+    # fall-through after an early return) is what mypy exempts on both OSes: on Linux
+    # the branch is skipped (no attr-defined, no unreachable); on Windows the `else` is
+    # the guard's non-matching branch (also exempt). The explicit else is required for
+    # that exemption, so RET505 is suppressed deliberately.
+    if sys.platform == "win32":
+        import ctypes
 
-    return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        return bool(ctypes.windll.shell32.IsUserAnAdmin())
+    else:  # noqa: RET505 — explicit else keeps mypy's platform-guard narrowing clean
+        return False
 
 
 def _psutil_avail_mb() -> float:  # pragma: no cover — trivial hardware read, exercised on the box
