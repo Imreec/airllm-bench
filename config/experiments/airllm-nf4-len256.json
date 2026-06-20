@@ -1,0 +1,10 @@
+{
+  "version": "1.00",
+  "runner": "airllm",
+  "quant": "nf4",
+  "prompt": "Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand. Layer streaming trades capacity for bandwidth by paging each transformer block from storage on demand.",
+  "prompt_tokens": 256,
+  "max_new_tokens": 4,
+  "phase": "warm",
+  "reps": 1
+}

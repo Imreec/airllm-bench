@@ -1,0 +1,10 @@
+{
+  "version": "1.00",
+  "runner": "llamacpp",
+  "quant": "q4_k_m",
+  "prompt": "Explain how virtual memory and demand paging let an operating system run a program whose footprint exceeds physical RAM, and why that mechanism matters for serving a large language model that does not fit in GPU memory.",
+  "prompt_tokens": 40,
+  "max_new_tokens": 16,
+  "phase": "warm",
+  "reps": 1
+}

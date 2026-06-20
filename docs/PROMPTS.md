@@ -95,3 +95,12 @@ sampler + env into the keyless worker), and a thin `cli.py` (`bench`). `tqdm` de
 keyless orchestrator smoke test imports it). OS-specific bits all injected → 100% coverage on every new
 module; only the Windows admin-check + `__main__` shims are pragma-excluded. Completes T5.4 — Phase 5
 is now code-complete; T5.5 is the at-the-keyboard Tier-2 run.
+
+### PR #16 — Phase 5 (T5.5 prep): experiment matrix + runbook
+"Size the Tier-2 matrix and write the configs + runbook before the at-the-keyboard run." → 13
+single-scenario `config/experiments/*.json` (AirLLM 4-bit cold/warm + warm rep + TTFT-vs-length sweep
+at 64/256/1024 native tokens, 8-bit cold/warm, FP16 cold/warm, llama.cpp warm + rep, baseline OOM),
+prompt_tokens pinned by tokenizing with the real Qwen tokenizer. `docs/RUNBOOK_TIER2.md` captures the
+disk choreography (C: NVMe for shards+GGUF, D: HDD for the HF cache only; one shard set at a time;
+pre-shard before cold so sharding doesn't warm the cache; elevated shell for the flush) + the batch
+commands. Adds the `airllm-bench` console entrypoint. Keyless; 91 tests green.
