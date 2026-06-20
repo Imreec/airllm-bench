@@ -119,3 +119,11 @@ resource peaks (peak VRAM / RSS / system / energy) on the failure path too, not 
 clean OOM is itself a resource event, and peak VRAM at the wall is the capacity-wall evidence (D3).
 Found while running the real baseline scenario during T5.5 (peak_vram≈12.16 GB, the card maxed).
 Keyless test on the OOM+sampler path; 92 tests, mypy clean (linux + win32).
+
+### PR #19 — Phase 5 (T5.5): fix cold-flush verification for Windows reality
+"The pre-flight cold-flush failed: freed only 30 MB (< 2000 required)." → the `verify_cache_dropped`
+gate was wrong on Windows — the Standby List counts toward `available`, so emptying GBs barely moves
+`available`, and the check could never pass. Removed the freed-MB gate (and `verify_cache_dropped` /
+the available read / `min_rise_mb`); `build_cold_flush` now = require-admin → RAMMap `-Et` (exit 0 still
+fails loud). Cold-ness is evidenced by the cold/warm timing delta (ADR 0001). Repointed config to
+`RAMMap64.exe -accepteula -Et`; documented as L-07. Caught by the operator's pre-flight test — 90 tests.

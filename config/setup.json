@@ -30,8 +30,7 @@
     }
   },
   "cold_flush": {
-    "_note": "EmptyStandbyList.exe (Sysinternals RAMMap companion) flushes the Windows Standby List; needs Administrator. min_rise_mb = the least freed memory that proves a real cold cache.",
-    "command": ["C:/tools/EmptyStandbyList.exe", "standbylist"],
-    "min_rise_mb": 2000
+    "_note": "Sysinternals RAMMap '-Et' empties the Windows Standby List (cached file pages); '-accepteula' makes it non-interactive. Needs Administrator. No freed-MB threshold: standby counts toward 'available' on Windows so the delta is ~0 even on a real flush (ADR 0001) — cold-ness is proven by the cold/warm timing delta.",
+    "command": ["C:/tools/RAMMap64.exe", "-accepteula", "-Et"]
   }
 }

@@ -26,7 +26,7 @@ def _setup_path(write_config: Callable[..., Path]) -> Path:
             },
             "model": {"repo_id": "m", "params": 1},
             "paths": {"layer_shards_saving_path": "C:/s"},
-            "cold_flush": {"command": ["tool"], "min_rise_mb": 1000},
+            "cold_flush": {"command": ["RAMMap64.exe", "-Et"]},
         },
         name="setup.json",
     )

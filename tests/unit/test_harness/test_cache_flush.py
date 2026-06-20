@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-
 import pytest
 
 from airllm_bench.harness.cache_flush import (
@@ -11,7 +9,6 @@ from airllm_bench.harness.cache_flush import (
     build_cold_flush,
     flush_standby_list,
     require_admin,
-    verify_cache_dropped,
 )
 
 
@@ -31,52 +28,27 @@ def test_flush_invokes_the_tool() -> None:
         captured["cmd"] = cmd
         captured["check"] = check
 
-    flush_standby_list(["EmptyStandbyList.exe", "standbylist"], run=fake_run)
-    assert captured["cmd"] == ["EmptyStandbyList.exe", "standbylist"]
+    flush_standby_list(["RAMMap64.exe", "-accepteula", "-Et"], run=fake_run)
+    assert captured["cmd"] == ["RAMMap64.exe", "-accepteula", "-Et"]
     assert captured["check"] is True
 
 
-@pytest.mark.parametrize(
-    ("before", "after", "ok"), [(1000.0, 4000.0, True), (1000.0, 1500.0, False)]
-)
-def test_verify_cache_dropped(before: float, after: float, ok: bool) -> None:
-    assert verify_cache_dropped(before, after, min_rise_mb=2000) is ok
-
-
-def _avail_reader(values: list[float]) -> Callable[[], float]:
-    it = iter(values)
-    return lambda: next(it)
-
-
-def test_build_cold_flush_happy_path() -> None:
-    runs: list[list[str]] = []
+def test_build_cold_flush_runs_admin_then_flush() -> None:
+    calls: list[list[str]] = []
     flush = build_cold_flush(
-        {"command": ["tool"], "min_rise_mb": 2000},
+        {"command": ["RAMMap64.exe", "-Et"]},
         is_admin=lambda: True,
-        run=lambda cmd, check: runs.append(cmd),
-        read_avail_mb=_avail_reader([1000.0, 4000.0]),  # rose 3000 >= 2000
+        run=lambda cmd, check: calls.append(cmd),
     )
     flush()
-    assert runs == [["tool"]]
-
-
-def test_build_cold_flush_raises_on_insufficient_drop() -> None:
-    flush = build_cold_flush(
-        {"command": ["tool"], "min_rise_mb": 2000},
-        is_admin=lambda: True,
-        run=lambda cmd, check: None,
-        read_avail_mb=_avail_reader([1000.0, 1200.0]),  # only 200 freed
-    )
-    with pytest.raises(RuntimeError, match="freed only"):
-        flush()
+    assert calls == [["RAMMap64.exe", "-Et"]]  # admin passed, tool invoked once
 
 
 def test_build_cold_flush_requires_admin() -> None:
     flush = build_cold_flush(
-        {"command": ["tool"]},
+        {"command": ["RAMMap64.exe", "-Et"]},
         is_admin=lambda: False,
         run=lambda cmd, check: None,
-        read_avail_mb=_avail_reader([1000.0]),
     )
     with pytest.raises(NotElevatedError):
-        flush()
+        flush()  # never reaches the flush tool
