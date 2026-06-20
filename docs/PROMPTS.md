@@ -112,3 +112,10 @@ runtime DLLs. `runners/llamacpp.py` now adds torch's bundled `torch/lib` (which 
 cu124) to the DLL search path before importing `llama_cpp` — guarded `if sys.platform == "win32"` so
 Linux mypy/CI stays clean. Verified on hardware: GPU offload True, 4 real tokens generated, logits
 5×152064 for perplexity. Keyless; mypy clean on `--platform linux` and `win32`; 92 tests.
+
+### PR #18 — Phase 5 (T5.5): capture resource peaks on the OOM path
+"The baseline OOM came back with peak_vram_mb=null." → `harness/run.py` now attaches the sampler's
+resource peaks (peak VRAM / RSS / system / energy) on the failure path too, not just on success — a
+clean OOM is itself a resource event, and peak VRAM at the wall is the capacity-wall evidence (D3).
+Found while running the real baseline scenario during T5.5 (peak_vram≈12.16 GB, the card maxed).
+Keyless test on the OOM+sampler path; 92 tests, mypy clean (linux + win32).

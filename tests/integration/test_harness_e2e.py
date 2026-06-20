@@ -58,6 +58,27 @@ def test_clean_oom_is_captured_not_raised(
     assert result.runtime_s is not None
 
 
+def test_oom_still_captures_resource_peaks(
+    experiment_config_data: dict[str, Any], write_config: Callable[..., Path]
+) -> None:
+    """A clean OOM is a resource event — peak VRAM at the wall is the capacity-wall evidence."""
+    exp = _exp(experiment_config_data, write_config)
+    result = run(
+        MockRunner(load_error="CUDA out of memory"),
+        exp,
+        exp_id="oom",
+        model="m",
+        param_count=1,
+        prompt_tokens=0,
+        sampler=_FakeSampler({"peak_vram_mb": 12000.0, "min_sys_avail_mb": 700.0}),
+        clock=_seq_clock(),
+    )
+    assert not result.ok
+    assert result.peak_vram_mb == 12000.0  # captured despite the failure
+    assert result.min_sys_avail_mb == 700.0
+    assert result.ttft_s is None  # no tokens, so timing stays null
+
+
 def test_sampler_report_maps_into_result(
     experiment_config_data: dict[str, Any], write_config: Callable[..., Path]
 ) -> None:
