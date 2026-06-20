@@ -103,8 +103,17 @@ def run(
     else:
         core = _measure(runner, exp, clock)
         report = {}
+    # Resource peaks are attached on BOTH paths: a clean OOM is itself a resource event —
+    # peak VRAM right before the failure is the capacity-wall evidence (D3), not noise.
+    resources: dict[str, Any] = {
+        "peak_vram_mb": report.get("peak_vram_mb"),
+        "peak_rss_mb": report.get("peak_rss_mb"),
+        "peak_sys_used_mb": report.get("peak_sys_used_mb"),
+        "min_sys_avail_mb": report.get("min_sys_avail_mb"),
+        "gpu_energy_j": report.get("gpu_energy_j"),
+    }
     if not core.ok:
-        return RunResult(ok=False, error=core.error, runtime_s=core.runtime_s, **base)
+        return RunResult(ok=False, error=core.error, runtime_s=core.runtime_s, **resources, **base)
     return RunResult(
         ok=True,
         ttft_s=core.ttft_s,
@@ -113,10 +122,6 @@ def run(
         throughput_tok_s=core.throughput_tok_s,
         runtime_s=core.runtime_s,
         perplexity=core.perplexity,
-        peak_vram_mb=report.get("peak_vram_mb"),
-        peak_rss_mb=report.get("peak_rss_mb"),
-        peak_sys_used_mb=report.get("peak_sys_used_mb"),
-        min_sys_avail_mb=report.get("min_sys_avail_mb"),
-        gpu_energy_j=report.get("gpu_energy_j"),
+        **resources,
         **base,
     )

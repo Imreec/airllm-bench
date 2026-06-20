@@ -104,3 +104,10 @@ prompt_tokens pinned by tokenizing with the real Qwen tokenizer. `docs/RUNBOOK_T
 disk choreography (C: NVMe for shards+GGUF, D: HDD for the HF cache only; one shard set at a time;
 pre-shard before cold so sharding doesn't warm the cache; elevated shell for the flush) + the batch
 commands. Adds the `airllm-bench` console entrypoint. Keyless; 91 tests green.
+
+### PR — Phase 5 (T5.5): capture resource peaks on the OOM path
+"The baseline OOM came back with peak_vram_mb=null." → `harness/run.py` now attaches the sampler's
+resource peaks (peak VRAM / RSS / system / energy) on the failure path too, not just on success — a
+clean OOM is itself a resource event, and peak VRAM at the wall is the capacity-wall evidence (D3).
+Found while running the real baseline scenario during T5.5. Keyless test on the OOM+sampler path; 92
+tests, mypy clean (linux + win32).
