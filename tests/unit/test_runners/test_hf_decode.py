@@ -26,8 +26,14 @@ def test_greedy_stream_yields_requested_count(monkeypatch: pytest.MonkeyPatch) -
 
 def test_greedy_stream_is_deterministic(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(sys.modules, "torch", fake_torch())
-    a = [e.token_id for e in hf_decode.greedy_stream(_forward(FakeHFModel()), FakeTokenizer(), "x", 2, 0)]
-    b = [e.token_id for e in hf_decode.greedy_stream(_forward(FakeHFModel()), FakeTokenizer(), "x", 2, 0)]
+    a = [
+        e.token_id
+        for e in hf_decode.greedy_stream(_forward(FakeHFModel()), FakeTokenizer(), "x", 2, 0)
+    ]
+    b = [
+        e.token_id
+        for e in hf_decode.greedy_stream(_forward(FakeHFModel()), FakeTokenizer(), "x", 2, 0)
+    ]
     assert a == b
 
 
