@@ -106,3 +106,16 @@ def fake_transformers(*, oom: bool = False) -> ModuleType:
         from_pretrained=_model_from_pretrained
     )
     return mod
+
+
+def fake_airllm(record: dict[str, Any] | None = None) -> ModuleType:
+    """A stand-in ``airllm`` module; ``record`` captures ``from_pretrained`` kwargs."""
+    mod = ModuleType("airllm")
+
+    def _from_pretrained(repo_id: str, **kwargs: Any) -> FakeAirLLMModel:
+        if record is not None:
+            record.update(kwargs)
+        return FakeAirLLMModel()
+
+    mod.AutoModel = SimpleNamespace(from_pretrained=_from_pretrained)  # type: ignore[attr-defined]
+    return mod

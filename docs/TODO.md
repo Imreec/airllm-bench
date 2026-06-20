@@ -90,7 +90,7 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 - [x] **T5.1** `runners/baseline_hf.py` — FP16, **GPU-only** `device_map={"":0}` **+
       `low_cpu_mem_usage=True`** (NOT `.to("cuda")`, which stages 64 GB in 32 GB host RAM → pagefile);
       expected clean VRAM OOM at load. **(D3, PR-review fixes — ADR 0001)**
-- [ ] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit; **pre-create the
+- [x] **T5.2** `runners/airllm.py` — AutoModel path, `compression` = none/8bit/4bit; **pre-create the
       shards dir**; **logits via `out[0]`** (forward returns a tuple). **Disk policy (ADR 0001):**
       `HF_HOME` → D:; shards on C:; **one compression level's shards at a time** (create→run→delete
       before the next) so C: never holds >1 set. **(G-SPIKE findings)**

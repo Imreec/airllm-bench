@@ -56,3 +56,9 @@ structural evals + `check_raw_data.py` + the mock-runner CI smoke test.
 runner: `runners/baseline_hf.py` (FP16 GPU-only `device_map={"":0}`, expected clean VRAM OOM) + the
 shared `runners/hf_decode.py` (greedy decode + forward-logits, DRY for the AirLLM runner). Tests inject
 fake torch/transformers via `sys.modules` so CI stays keyless. Also backfilled the PR #8/#9 prompt log.
+
+### PR #11 — Phase 5 (T5.2): airllm runner
+"Build the AirLLM runner reusing the shared decode core." → `runners/airllm.py` (AutoModel path,
+`cfg.quant` → `compression` none/8bit/4bit, pre-creates the shards dir for AirLLM's `check_space`,
+logits from the forward tuple `out[0]`). Reuses `hf_decode`; tests inject a fake `airllm` module and
+capture `from_pretrained` kwargs to assert the compression mapping. Keyless, 100% coverage.
