@@ -77,3 +77,11 @@ build → run → append one RunResult JSONL line; sampler/env injected so it st
 a `runners` section + an optional `prompt_tokens` override (whitespace estimate when absent). Mock-runner
 tested, 100% coverage. T5.4b adds the hardware glue (NVML reader, env, cold-cache flush + admin guard,
 the subprocess matrix orchestrator, `cli bench`).
+
+### PR #14 — Phase 5 (T5.4b): hardware instrumentation
+"Capture GPU+memory telemetry and stack metadata into each RunResult." → `harness/hw_reader.py`
+(`make_reader`: NVML power/VRAM + psutil RSS/system → the `ResourceReading` the sampler polls; lazy
+import, fakes injected in tests) + `harness/env_info.py` (`collect_env`: os/python/torch/cuda/driver,
+best-effort so missing pieces are "" not errors). Caught an env-dependent test (the dev box has a real
+GPU, so NVML succeeds locally) → forced the absent path with `sys.modules[name]=None`. 100% coverage.
+T5.4c adds the cold-cache flush + admin guard + the subprocess matrix orchestrator + `cli bench`.
