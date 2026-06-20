@@ -25,8 +25,9 @@ launches the elevated batches.
 
 1. `uv sync --extra runtime` (torch `cu124` + airllm + transformers `<4.43`). For the competitor also
    `uv sync --extra runtime --extra llamacpp` (the GGUF runner).
-2. **`C:/tools/EmptyStandbyList.exe`** present (Wagnard's standby-list flusher) — the cold-cache tool
-   named in `config/setup.json → cold_flush.command`. Without it, run warm-only (`--no-flush`).
+2. **`C:/tools/RAMMap64.exe`** present (Sysinternals; `-Et` empties the Standby List) — the cold-cache
+   tool named in `config/setup.json → cold_flush.command`. The first `-accepteula` run is
+   non-interactive thereafter. Without it, run warm-only (`--no-flush`).
 3. **GGUF** `C:/models/Qwen2.5-32B-Instruct-Q4_K_M.gguf` (~18 GB) for the llama.cpp batch.
 4. HF cache relocated to D: (`setx HF_HOME D:/hf_cache`, then move the existing cache) before the
    8-bit/FP16 sharding steps — frees C: for the FP16 shard set.
