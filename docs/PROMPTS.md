@@ -173,4 +173,9 @@ The nf4-warm point *climbs* HBM→PCIe exactly because 16 GB fits the 32 GB cach
 the memory-hierarchy result falls out of the arithmetic. Structural eval reproduces points from
 committed config+results and asserts no point exceeds its binding bandwidth (utilization ≤ 1). Tier
 assignment is by data path not saturation (AirLLM is overhead-bound ≪ every ceiling) — disclosed as
-L-10. 133 tests, 100% on new modules, mypy --strict clean (linux + win32).
+L-10. Antigravity review caught two [Blocking] gaps: (1) D7 requires a **prefill** (compute-bound)
+point too, not just decode → added `prefill_operating_point` (FLOPs=2·P·prompt_tokens, intensity
+2·tokens/bpw, achieved=FLOPs/ttft), with a structural assertion that prefill is higher-intensity than
+decode; (2) `fits_in_ram` ignored OS/Python/torch RAM → added a configurable `os_overhead_gb` (≈5 GB,
+usable cache ≈27 GB). Nit: moved the resident-runner knowledge out of code into `setup.json`
+(`"resident": true`) read via `resident_runner_names`. 137 tests, 100% on new modules.

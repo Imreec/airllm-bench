@@ -63,6 +63,8 @@ class RooflineConfig(_Section):
     pcie_gb_s: float
     nvme_gb_s: float
     bytes_per_weight: dict[str, float]
+    # RAM reserved by OS/Python/torch before it can serve as page cache (D7/L-10).
+    os_overhead_gb: float = 0.0
 
 
 class SetupConfig(BaseModel):

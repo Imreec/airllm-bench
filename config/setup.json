@@ -21,12 +21,13 @@
     "figures_dir": "figures"
   },
   "runners": {
-    "baseline_hf": { "device": 0 },
-    "airllm": { "device": "cuda" },
+    "baseline_hf": { "device": 0, "resident": true },
+    "airllm": { "device": "cuda", "resident": false },
     "llamacpp": {
-      "_note": "gguf_path + n_gpu_layers set during T5.5 prep once the GGUF is downloaded; n_gpu_layers tuned to what fits the 12 GB card.",
+      "_note": "gguf_path + n_gpu_layers set during T5.5 prep once the GGUF is downloaded; n_gpu_layers tuned to what fits the 12 GB card. resident=true: weights live in VRAM (HBM-bound), unlike AirLLM's per-layer streaming.",
       "gguf_path": "C:/models/Qwen2.5-32B-Instruct-Q4_K_M.gguf",
-      "n_gpu_layers": 20
+      "n_gpu_layers": 20,
+      "resident": true
     }
   },
   "cold_flush": {
@@ -40,6 +41,7 @@
     "hbm_gb_s": 912,
     "pcie_gb_s": 31.5,
     "nvme_gb_s": 7.0,
+    "os_overhead_gb": 5.0,
     "bytes_per_weight": {
       "none": 2.0,
       "int8": 1.0,
@@ -50,7 +52,8 @@
       "compute_and_hbm": "RTX 3080 Ti — FP16 dense tensor 68.2 TFLOP/s (sparse 136.4), 912 GB/s GDDR6X 384-bit (gpupoet.com/gpu/learn/card/nvidia-geforce-rtx-3080-ti)",
       "pcie": "PCIe 4.0 x16 unidirectional 31.5 GB/s (en.wikipedia.org/wiki/PCI_Express)",
       "nvme": "PCIe Gen4 NVMe sequential read ~7.0 GB/s (tomshardware.com/features/ssd-benchmarks-hierarchy)",
-      "bytes_per_weight": "fp16=2B, int8=1B, nf4=0.5B (4 bits), q4_k_m≈0.56B (~4.5 bpw effective)"
+      "bytes_per_weight": "fp16=2B, int8=1B, nf4=0.5B (4 bits), q4_k_m≈0.56B (~4.5 bpw effective)",
+      "os_overhead_gb": "OS + Python + PyTorch baseline RSS reserved from the 32 GB before it can serve as page cache; ~5 GB is the conservative working figure for this box (so usable cache ≈ 27 GB)"
     }
   }
 }
