@@ -63,14 +63,17 @@ def throughput_by_scenario(results: Sequence[RunResult]) -> dict[str, float]:
 def perplexity_by_quant(results: Sequence[RunResult]) -> dict[str, float]:
     """{precision label: perplexity}, one warm AirLLM run per quant.
 
-    Pinned to the baseline (shortest) prompt length so the comparison is at a
-    *fixed* prompt across quants — perplexity across prompt lengths is not
-    comparable (longer context lowers it), so a stray length-sweep run must not
-    feed this figure.
+    Pinned to ONE global prompt length shared across quants — not a per-quant
+    baseline. This figure compares *across* quants, so all bars must sit at the
+    same length: perplexity across prompt lengths is not comparable (longer
+    context lowers it). Under an asymmetric matrix a per-quant baseline could
+    compare nf4@40 against int8@64; the global pin avoids that, and a quant with
+    no run at the shared length is dropped rather than mis-compared.
     """
+    lengths = [r.prompt_tokens for r in _select(results, runner="airllm", phase="warm")]
+    base = min(lengths) if lengths else None
     out: dict[str, float] = {}
     for quant, label in _QUANT_LABEL.items():
-        base = _baseline_length(results, "airllm", quant)
         run = _first(results, runner="airllm", quant=quant, phase="warm", prompt_tokens=base)
         if run and run.perplexity is not None:
             out[label] = run.perplexity
