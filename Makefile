@@ -1,4 +1,4 @@
-.PHONY: install install-runtime install-llamacpp test test-fast lint format type-check grade clean help
+.PHONY: install install-runtime install-llamacpp test test-fast lint format type-check grade figures clean help
 
 PYTHON := uv run python
 
@@ -13,8 +13,8 @@ help:
 	@echo "  make format          Run ruff formatter and auto-fix"
 	@echo "  make type-check      Run mypy --strict on src/"
 	@echo "  make grade           Full quality gate (lint + type-check + test + scanners)"
+	@echo "  make figures         Regenerate report figures from results/ (keyless, offline)"
 	@echo "  make clean           Remove caches and build artifacts"
-	@echo "  (bench / figures / economics / report-check land in later phases)"
 
 install:
 	uv sync
@@ -49,6 +49,9 @@ grade: lint type-check test
 	$(PYTHON) scripts/check_raw_data.py
 	@echo ""
 	@echo "All quality checks passed."
+
+figures:
+	$(PYTHON) -m airllm_bench.cli figures
 
 clean:
 	rm -rf .ruff_cache .mypy_cache .pytest_cache .coverage coverage.xml htmlcov build dist

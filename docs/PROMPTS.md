@@ -179,3 +179,16 @@ point too, not just decode → added `prefill_operating_point` (FLOPs=2·P·prom
 decode; (2) `fits_in_ram` ignored OS/Python/torch RAM → added a configurable `os_overhead_gb` (≈5 GB,
 usable cache ≈27 GB). Nit: moved the resident-runner knowledge out of code into `setup.json`
 (`"resident": true`) read via `resident_runner_names`. 137 tests, 100% on new modules.
+
+### PR #24 — Phase 6 (T6.3): plotting
+"Render every report figure from committed data, keyless and offline." → `plotting/` (Agg-backed
+`base`, `latency` (ttft-vs-length / ITL / cold-warm headline), `throughput_quality`, `economics_fig`
+(break-even), `roofline_fig`, `prepare` (pure result→figure selectors), `build` (orchestrator)).
+`make figures` + `airllm-bench figures` regenerate all 7 PNGs into `figures/` (committed). Figure
+builders are pure functions of prepared data so each is unit-tested for the right artists; `build`
+is exercised end-to-end on the committed results. `check_raw_data.py` tightened from "any figure
+needs any data" to: the committed figure set must equal the expected set AND the headline scenarios
+(llamacpp-q4-warm, airllm-nf4-cold/-warm) must exist under `results/`. The break-even chart shows the
+on-prem line never dropping below the API line (never amortizes); the roofline shows decode points at
+low intensity and prefill points climbing toward the compute roof. 159 tests, mypy --strict clean
+(linux + win32). Completes Phase 6 — only the README report + final gates (Phase 7) remain.
