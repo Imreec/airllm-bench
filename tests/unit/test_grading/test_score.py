@@ -53,6 +53,27 @@ def test_a_score_out_of_range_is_flagged() -> None:
     assert any("score" in problem.lower() for problem in problems)
 
 
+def test_fractional_weights_summing_to_100_within_float_error_pass() -> None:
+    # 1.1 accumulated 90× + 1.0 == 100.00000000000001 in IEEE 754 — must not spuriously fail.
+    weights = [1.1] * 90 + [1.0]
+    assert sum(weights) != 100.0  # guard: this case really does trip strict equality
+    rubric = _rubric(
+        [{"name": str(i), "weight": w, "score_pct": 90} for i, w in enumerate(weights)]
+    )
+    assert not any("weight" in problem.lower() for problem in validate_rubric(rubric))
+
+
+def test_a_negative_weight_is_flagged() -> None:
+    rubric = _rubric(
+        [
+            {"name": "a", "weight": -10, "score_pct": 90},
+            {"name": "b", "weight": 110, "score_pct": 90},
+        ]
+    )
+    problems = validate_rubric(rubric)
+    assert any("weight" in problem.lower() and "a" in problem for problem in problems)
+
+
 def test_the_committed_rubric_loads_validates_and_lands_in_range() -> None:
     rubric = load_rubric(_REPO_ROOT / "config" / "self_grade.json")
     assert validate_rubric(rubric) == []

@@ -10,6 +10,7 @@ T7.3); the scorer keeps them arithmetically defensible and re-runnable by a grad
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
@@ -60,9 +61,12 @@ def validate_rubric(rubric: Rubric) -> list[str]:
     """Return every consistency problem (empty list ⇒ the grade is defensible)."""
     problems: list[str] = []
     weight_sum = sum(cat.weight for cat in rubric.categories)
-    if weight_sum != _TOTAL_WEIGHT:
+    # isclose, not ==: fractional weights can sum to 100.000…1 in IEEE 754.
+    if not math.isclose(weight_sum, _TOTAL_WEIGHT):
         problems.append(f"category weights sum to {weight_sum}, must be {_TOTAL_WEIGHT}")
     for cat in rubric.categories:
+        if cat.weight < 0.0:
+            problems.append(f"weight for '{cat.name}' is {cat.weight}, must be non-negative")
         if not 0.0 <= cat.score_pct <= 100.0:
             problems.append(f"score for '{cat.name}' is {cat.score_pct}, must be 0–100")
     total = weighted_total(rubric)
