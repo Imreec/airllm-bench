@@ -107,22 +107,25 @@ Scenarios 2–4 are a **within-runtime quant sweep** (same algorithm, bit-width 
 **How it's measured (D4/D5):** TTFT and per-token latency come from **per-token streaming timestamps**, never total ÷ count. Greedy decoding (temperature 0) for determinism. A background `ResourceSampler` thread samples NVML GPU power/VRAM + psutil RAM on one monotonic clock. **Cold vs warm** is measured with a **paired protocol**: an elevated cache flush isolates the model in the OS page cache, then the warm run repeats on the now-populated cache. GPU energy is integrated from measured NVML power; CPU energy is a declared TDP estimate.
 
 ```mermaid
-flowchart LR
-    C["config/*.json<br/>(versioned, fail-loud)"] --> H
+%%{init: {'theme':'neutral', 'themeVariables': {'fontSize':'18px'}, 'flowchart': {'rankSpacing': 55, 'nodeSpacing': 50}}}%%
+flowchart TD
+    C["config/*.json<br/>(versioned, fail-loud)"]
     subgraph T2["Tier-2 · hardware-bound · NOT in CI"]
+        direction LR
         H["harness +<br/>ResourceSampler"] --> RUN["runners:<br/>baseline_hf · airllm · llamacpp"]
     end
-    RUN --> R[("results/*.jsonl<br/>committed evidence")]
+    R[("results/*.jsonl<br/>committed evidence")]
     subgraph T1["Tier-1 · keyless · offline · CI"]
-        R --> M[metrics]
-        R --> E[economics]
-        R --> RF[roofline]
-        M --> P[plotting]
-        E --> P
-        RF --> P
+        direction LR
+        M[metrics] --> P[plotting]
+        E[economics] --> P
+        RF[roofline] --> P
     end
+    C --> H
+    RUN --> R
+    R --> M & E & RF
     P --> F["figures/*.png"]
-    F --> RM["README (this report)"]
+    F --> RM["README<br/>(this report)"]
 ```
 
 ---
