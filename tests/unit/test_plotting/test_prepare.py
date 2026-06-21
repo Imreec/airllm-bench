@@ -89,6 +89,18 @@ def test_perplexity_by_quant_uses_labelled_quants() -> None:
     assert ppl == {"4-bit": 39.9, "8-bit": 24.2}
 
 
+def test_perplexity_compares_quants_at_the_same_baseline_length() -> None:
+    # A longer-prompt sweep run carries a different (lower) perplexity, but perplexity
+    # across prompt lengths is not comparable. The cross-quant figure must pin to the
+    # baseline (shortest) length — like every sibling selector — not pick whichever
+    # warm run loads first (which would plot 1.7 for 4-bit and invert the thesis).
+    rows = [
+        _r("nf4-len256", "airllm", "nf4", "warm", prompt_tokens=256, perplexity=1.7),
+        _r("nf4-warm", "airllm", "nf4", "warm", prompt_tokens=40, perplexity=39.9),
+    ]
+    assert perplexity_by_quant(rows) == {"4-bit": 39.9}
+
+
 def test_itl_series_picks_nf4_cold_and_warm() -> None:
     rows = [
         _r("airllm-nf4-cold", "airllm", "nf4", "cold", itl_s=[3.0, 1.0]),

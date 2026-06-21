@@ -61,10 +61,17 @@ def throughput_by_scenario(results: Sequence[RunResult]) -> dict[str, float]:
 
 
 def perplexity_by_quant(results: Sequence[RunResult]) -> dict[str, float]:
-    """{precision label: perplexity}, one warm AirLLM run per quant."""
+    """{precision label: perplexity}, one warm AirLLM run per quant.
+
+    Pinned to the baseline (shortest) prompt length so the comparison is at a
+    *fixed* prompt across quants — perplexity across prompt lengths is not
+    comparable (longer context lowers it), so a stray length-sweep run must not
+    feed this figure.
+    """
     out: dict[str, float] = {}
     for quant, label in _QUANT_LABEL.items():
-        run = _first(results, runner="airllm", quant=quant, phase="warm")
+        base = _baseline_length(results, "airllm", quant)
+        run = _first(results, runner="airllm", quant=quant, phase="warm", prompt_tokens=base)
         if run and run.perplexity is not None:
             out[label] = run.perplexity
     return out
