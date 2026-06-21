@@ -49,6 +49,24 @@ class PathsConfig(_Section):
     figures_dir: str = "figures"
 
 
+class RooflineConfig(_Section):
+    """Hierarchical-roofline ceilings + per-quant byte cost for the box (D7).
+
+    Memory-hierarchy diagonals (GB/s) and the silicon compute roof (TFLOP/s);
+    ``bytes_per_weight`` maps each ``quant`` to its on-the-wire byte cost per
+    parameter (fp16=2, int8=1, nf4=0.5, q4_k_m≈0.56).
+    """
+
+    compute_fp16_tflops: float
+    compute_fp16_sparse_tflops: float = 0.0
+    hbm_gb_s: float
+    pcie_gb_s: float
+    nvme_gb_s: float
+    bytes_per_weight: dict[str, float]
+    # RAM reserved by OS/Python/torch before it can serve as page cache (D7/L-10).
+    os_overhead_gb: float = 0.0
+
+
 class SetupConfig(BaseModel):
     """``config/setup.json`` — hardware, model, and paths."""
 
@@ -58,6 +76,8 @@ class SetupConfig(BaseModel):
     hardware: HardwareConfig
     model: ModelConfig
     paths: PathsConfig
+    # Roofline ceilings (optional: only the Phase-6 roofline tier reads it).
+    roofline: RooflineConfig | None = None
     # Per-runner constructor params the factory injects (device / gguf_path / n_gpu_layers).
     # Kept loose (data, not code) so a runtime knob lands without a schema change.
     runners: dict[str, Any] = Field(default_factory=dict)

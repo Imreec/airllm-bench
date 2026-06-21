@@ -157,3 +157,25 @@ single-stream 32B *electricity alone* (~$4.3/Mtok) exceeds the blended API price
 on-prem never breaks even — the API's batching/throughput advantage dominates (a clean negative result).
 Structural eval builds the lines from committed config+results and asserts monotonic curves + the
 cautionary AirLLM line dominating the realistic one. 116 tests, 100% on new modules, mypy clean.
+Antigravity review caught a real [Blocking] bug — `…/(throughput or inf)` made a stalled run read as
+$0 (free) not infinite; fixed + zero-utilization inf guard + breakeven_volume None on non-positive
+crossing (PR #22 follow-up). 120 tests.
+
+### PR #23 — Phase 6 (T6.2): roofline
+"Build the hierarchical roofline from the committed results, keyless." → `roofline/ceilings.py`
+(compute roof + HBM/PCIe/NVMe diagonals; `attainable_flops = min(compute, bw×intensity)`) and
+`roofline/points.py` (operating point per run: FLOPs/tok=2·P, bytes/tok=P·bpw, intensity=2/bpw,
+achieved FLOP/s & bandwidth; binding tier by physical data path — resident→HBM, AirLLM cold→NVMe,
+warm→PCIe iff the footprint fits RAM, else NVMe — computed from `param_count·bpw < ram`). Ceilings
+finalized with real sources in a `setup.json` `roofline` block (→1.01): 3080 Ti 68.2 TFLOP/s dense
+tensor + 912 GB/s HBM, PCIe4 31.5 GB/s, NVMe ~7 GB/s, bytes/weight fp16=2/int8=1/nf4=0.5/q4_k_m≈0.56.
+The nf4-warm point *climbs* HBM→PCIe exactly because 16 GB fits the 32 GB cache while int8/fp16 don't —
+the memory-hierarchy result falls out of the arithmetic. Structural eval reproduces points from
+committed config+results and asserts no point exceeds its binding bandwidth (utilization ≤ 1). Tier
+assignment is by data path not saturation (AirLLM is overhead-bound ≪ every ceiling) — disclosed as
+L-10. Antigravity review caught two [Blocking] gaps: (1) D7 requires a **prefill** (compute-bound)
+point too, not just decode → added `prefill_operating_point` (FLOPs=2·P·prompt_tokens, intensity
+2·tokens/bpw, achieved=FLOPs/ttft), with a structural assertion that prefill is higher-intensity than
+decode; (2) `fits_in_ram` ignored OS/Python/torch RAM → added a configurable `os_overhead_gb` (≈5 GB,
+usable cache ≈27 GB). Nit: moved the resident-runner knowledge out of code into `setup.json`
+(`"resident": true`) read via `resident_runner_names`. 137 tests, 100% on new modules.
