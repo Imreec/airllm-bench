@@ -93,6 +93,23 @@ def cautionary_airllm_run(results: Sequence[RunResult]) -> RunResult | None:
     return _first(results, runner="airllm", quant="nf4", phase="warm", prompt_tokens=base)
 
 
+def roofline_runs(results: Sequence[RunResult]) -> list[RunResult]:
+    """Canonical runs for the roofline: one per (runner, quant, phase) at the
+    baseline length.
+
+    The repeat (-r2) and length-sweep runs only crowd the centerpiece chart
+    without changing the memory-hierarchy argument, so they are dropped here —
+    the figure builder stays dumb and plots whatever it is handed.
+    """
+    canonical: dict[tuple[str, str, str], RunResult] = {}
+    for r in results:
+        base = _baseline_length(results, r.runner, r.quant)
+        if r.prompt_tokens != base:
+            continue
+        canonical.setdefault((r.runner, r.quant, r.phase), r)
+    return list(canonical.values())
+
+
 def itl_series(results: Sequence[RunResult]) -> dict[str, list[float]]:
     """{label: inter-token series} for the nf4 cold vs warm runs (the spike)."""
     out: dict[str, list[float]] = {}

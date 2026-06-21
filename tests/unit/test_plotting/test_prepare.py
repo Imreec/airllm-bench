@@ -9,6 +9,7 @@ from airllm_bench.plotting.prepare import (
     itl_series,
     perplexity_by_quant,
     realistic_run,
+    roofline_runs,
     throughput_by_scenario,
     ttft_curve,
 )
@@ -113,6 +114,21 @@ def test_perplexity_pins_one_global_length_across_quants() -> None:
         _r("int8-64", "airllm", "int8", "warm", prompt_tokens=64, perplexity=24.2),
     ]
     assert perplexity_by_quant(rows) == {"4-bit": 39.9}  # int8 has no 40-token run
+
+
+def test_roofline_runs_keeps_one_canonical_run_per_scenario() -> None:
+    # The roofline plots one point per (runner, quant, phase) at the baseline length.
+    # Repeat (-r2) and length-sweep runs only crowd the chart without changing the
+    # memory-hierarchy argument, so they must be dropped.
+    rows = [
+        _r("airllm-nf4-cold", "airllm", "nf4", "cold", ttft_s=43.7, throughput_tok_s=0.04),
+        _r("airllm-nf4-warm", "airllm", "nf4", "warm", ttft_s=19.3, throughput_tok_s=0.05),
+        _r("airllm-nf4-warm-r2", "airllm", "nf4", "warm", ttft_s=19.8, throughput_tok_s=0.05),
+        _r("airllm-nf4-len64", "airllm", "nf4", "warm", prompt_tokens=64, ttft_s=20.0),
+        _r("airllm-nf4-len256", "airllm", "nf4", "warm", prompt_tokens=256, ttft_s=21.0),
+    ]
+    kept = {r.exp_id for r in roofline_runs(rows)}
+    assert kept == {"airllm-nf4-cold", "airllm-nf4-warm"}  # r2 + length sweep dropped
 
 
 def test_itl_series_picks_nf4_cold_and_warm() -> None:
