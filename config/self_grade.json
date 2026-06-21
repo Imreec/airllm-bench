@@ -1,0 +1,36 @@
+{
+  "version": "1.00",
+  "cap": 95,
+  "categories": [
+    {
+      "name": "Analysis & theory-linking",
+      "weight": 35,
+      "score_pct": 93,
+      "note": "baseline/AirLLM/quant/competitor depth; prefill/decode + memory/compute-bound + paging; the hierarchical roofline"
+    },
+    {
+      "name": "Measurement rigor & reproducibility",
+      "weight": 25,
+      "score_pct": 93,
+      "note": "six metrics from streaming timestamps; paired cold/warm; committed raw JSON; figures regenerate offline"
+    },
+    {
+      "name": "Economics",
+      "weight": 15,
+      "score_pct": 91,
+      "note": "two on-prem lines + API + caching + cloud; break-even; assumptions sourced; near-comparable-SKU caveat (L-09)"
+    },
+    {
+      "name": "Report / README quality",
+      "weight": 15,
+      "score_pct": 92,
+      "note": "hardware + model justification; findings; reproduction; all seven figures embedded inline"
+    },
+    {
+      "name": "Process & code quality",
+      "weight": 10,
+      "score_pct": 95,
+      "note": "ruff/mypy --strict/coverage/file-size gates; atomic squash-merged PRs; cross-model review; honest disclosure"
+    }
+  ]
+}
