@@ -121,15 +121,17 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
 
 ## Phase 7 — Report & final gates
 
-- [ ] **T7.1** `scripts/check_report.py` — assert README has every required section + embedded figure.
-      **(salvage, D11)**
-- [ ] **T7.2** Write `README.md` = the deep-dive report: hardware + model justification, experiment,
+- [x] **T7.1** `scripts/check_report.py` — assert README has every required section + embedded figure.
+      Plus `scripts/self_grade.py` (keyless rubric scorer, closes the SELF_GRADE↔script gap). **(salvage, D11)**
+- [x] **T7.2** Write `README.md` = the deep-dive report: hardware + model justification, experiment,
       findings (baseline/AirLLM/quant/competitor), theory-linking (Prefill/Decode, memory/compute-
       bound, paging/mmap), economics + recommendation, reproduction, all figures inline. Framed as
       "where does layer-streaming pay off?" **(D12, brief §8)**
-- [ ] **T7.3** Fill `KNOWN_LIMITATIONS.md` + `SELF_GRADE.md` (target 92–93) + `COST.md`. **(D13)**
-- [ ] **T7.4** Final integration gate: `make grade` + `check_report` + `check_raw_data` green;
-      every figure backed by raw data; docs↔repo consistent. **(D11, D13)**
+- [x] **T7.3** Fill `KNOWN_LIMITATIONS.md` + `SELF_GRADE.md` (92.8/100) + `COST.md`. **(D13)**
+- [x] **T7.4** Final integration gate: `make grade` (now incl. `check_report` + `self_grade`) +
+      `check_raw_data` green; every figure backed by raw data; docs↔repo consistent. **(D11, D13)**
+
+**🏁 Phase 7 complete — all seven phases done. The report and every gate are green.**
 
 ---
 
