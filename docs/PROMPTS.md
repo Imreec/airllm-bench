@@ -144,3 +144,16 @@ the 4-bit length sweep, the llama.cpp Q4 competitor, and the baseline FP16 OOM. 
 monotonic: warm speedup 2.26× (4-bit, fits RAM) → 1.07× (8-bit) → 1.02× (FP16, exceeds RAM); TPOT and
 perplexity both ordered by precision. `results/README.md` documents the matrix + env. Closes T5.5 —
 Phase 5 complete; Phase 6 (economics/roofline/plotting) consumes these keylessly.
+
+### PR #22 — Phase 6 (T6.1): economics
+"Build the keyless economics layer from the committed results." → `metrics/load.py` (the one read path
+for `results/*.jsonl`), `economics/config.py` (typed `EconomicsConfig` with provenance + CAPEX-scope
+knob), `economics/energy.py` (per-token energy = measured GPU avg-power×tpot + TDP-estimated CPU),
+`economics/onprem.py` (amortized CAPEX + measured-energy OPEX → $/Mtok; utilization the sensitive knob),
+`economics/breakeven.py` (the five lines: API · API+cache · On-Prem realistic · On-Prem AirLLM · Cloud).
+Pricing constants finalized with real sources (OpenRouter Qwen2.5-Coder-32B, Israel tariff, RunPod 3090)
+— `economics.json` → 1.01; comparability caveats as L-09. **Finding:** at Israel's $0.228/kWh the local
+single-stream 32B *electricity alone* (~$4.3/Mtok) exceeds the blended API price (~$1.66/Mtok), so
+on-prem never breaks even — the API's batching/throughput advantage dominates (a clean negative result).
+Structural eval builds the lines from committed config+results and asserts monotonic curves + the
+cautionary AirLLM line dominating the realistic one. 116 tests, 100% on new modules, mypy clean.

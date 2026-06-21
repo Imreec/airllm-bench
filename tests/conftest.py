@@ -44,6 +44,26 @@ def experiment_config_data() -> dict[str, Any]:
 
 
 @pytest.fixture
+def economics_config_data() -> dict[str, Any]:
+    """A complete, valid ``config/economics.json`` payload (round numbers for math)."""
+    return {
+        "version": "1.00",
+        "api": {"qwen2.5-32b": {"input_per_mtok_usd": 0.5, "output_per_mtok_usd": 1.0}},
+        "electricity": {"tariff_usd_per_kwh": 0.2},
+        "hardware_power": {"gpu_tdp_w": 350, "cpu_tdp_w": 100, "cpu_load_fraction": 0.5},
+        "capex": {
+            "scope": "gpu_only",
+            "gpu_cost_usd": 1200,
+            "whole_pc_cost_usd": 2400,
+            "amortization_years": 3,
+        },
+        "cloud_gpu": {"usd_per_hour": 0.36},
+        "caching": {"cached_input_discount": 0.1, "cached_fraction": 0.5},
+        "utilization": {"duty_cycle": 0.5},
+    }
+
+
+@pytest.fixture
 def write_config(tmp_path: Path) -> Callable[[dict[str, Any]], Path]:
     """Return a factory that writes a config payload to a temp file and returns its path."""
 
