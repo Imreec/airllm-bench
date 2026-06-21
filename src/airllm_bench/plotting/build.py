@@ -7,7 +7,7 @@ network — regenerates the committed figures offline (D11).
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 from airllm_bench.economics.breakeven import build_lines
@@ -31,12 +31,31 @@ from airllm_bench.shared.config_models import RooflineConfig, SetupConfig
 _VOLUMES = [1e6, 1e7, 1e8, 1e9, 1e10]
 
 
+def _dedupe_operating_points(points: Iterable[OperatingPoint]) -> list[OperatingPoint]:
+    """One point per (quant, phase, binding tier) — coincident runs are one point.
+
+    A roofline operating point is defined by its intensity (fixed by quant) and the
+    tier it binds: int8/none cold≈warm bind the same tier at the same intensity, so
+    they land on the *same* spot and only pile up labels. nf4 cold (NVMe) vs warm
+    (PCIe) bind *different* tiers — that climb is the thesis, so both survive. Warm is
+    the preferred survivor of a coincident pair; sorted so the result is deterministic.
+    """
+    seen: dict[tuple[str, str, str], OperatingPoint] = {}
+    for p in sorted(points, key=lambda op: ("warm" not in op.exp_id, op.exp_id)):
+        seen.setdefault((p.quant, p.phase, p.binding_tier), p)
+    return list(seen.values())
+
+
 def _operating_points(
     results: Sequence[RunResult],
     rc: RooflineConfig,
     setup: SetupConfig,
 ) -> list[OperatingPoint]:
-    """Decode points for every run + prefill points where a TTFT exists."""
+    """Decode points for every run + prefill points where a TTFT exists.
+
+    Deduped to one point per (quant, phase, binding tier) so coincident cold/warm
+    runs don't stack labels on the centerpiece chart.
+    """
     resident = resident_runner_names(setup.runners)
     ram = setup.hardware.ram_gb
     pts: list[OperatingPoint] = []
@@ -44,7 +63,7 @@ def _operating_points(
         decode = operating_point(r, rc, ram, resident)
         prefill = prefill_operating_point(r, rc, ram, resident)
         pts.extend(p for p in (decode, prefill) if p is not None)
-    return pts
+    return _dedupe_operating_points(pts)
 
 
 def build_figures(

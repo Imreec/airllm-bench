@@ -9,7 +9,8 @@ from typing import Any
 import pytest
 
 from airllm_bench.harness.result import RunResult
-from airllm_bench.plotting.build import build_figures
+from airllm_bench.plotting.build import _dedupe_operating_points, build_figures
+from airllm_bench.roofline.points import OperatingPoint
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 _SETUP = REPO_ROOT / "config" / "setup.json"
@@ -23,6 +24,39 @@ _EXPECTED = {
     "roofline.png",
     "breakeven.png",
 }
+
+
+def _op(exp_id: str, quant: str, phase: str, tier: str) -> OperatingPoint:
+    return OperatingPoint(
+        exp_id=exp_id,
+        quant=quant,
+        phase=phase,
+        flops=1.0,
+        bytes_moved=1.0,
+        intensity_flops_per_byte=1.0,
+        achieved_flops=1.0,
+        achieved_bytes_s=1.0,
+        binding_tier=tier,
+        tier_bandwidth_bytes_s=1.0,
+        tier_utilization=0.1,
+    )
+
+
+def test_dedupe_keeps_one_point_per_quant_phase_tier_preferring_warm() -> None:
+    # int8 cold≈warm bind the same tier → one coincident roofline point (label soup).
+    # nf4 cold (NVMe) vs warm (PCIe) bind *different* tiers → both survive (the climb).
+    pts = [
+        _op("airllm-int8-cold", "int8", "decode", "nvme"),
+        _op("airllm-int8-warm", "int8", "decode", "nvme"),
+        _op("airllm-nf4-cold", "nf4", "decode", "nvme"),
+        _op("airllm-nf4-warm", "nf4", "decode", "pcie"),
+    ]
+    kept = {(p.quant, p.phase, p.binding_tier): p.exp_id for p in _dedupe_operating_points(pts)}
+    assert kept == {
+        ("int8", "decode", "nvme"): "airllm-int8-warm",  # coincident pair → warm survivor
+        ("nf4", "decode", "nvme"): "airllm-nf4-cold",
+        ("nf4", "decode", "pcie"): "airllm-nf4-warm",
+    }
 
 
 def test_build_figures_writes_every_expected_png(tmp_path: Path) -> None:
