@@ -196,3 +196,56 @@ low intensity and prefill points climbing toward the compute roof. Antigravity r
 `(phase)`; [Should-fix] hardcoded `prompt_tokens=40` + asymmetric cold/warm queries → a derived
 `_baseline_length` (min prompt length) applied symmetrically to both phases. 163 tests, mypy --strict
 clean (linux + win32). Completes Phase 6 — only the README report + final gates (Phase 7) remain.
+
+### PR #25 — Phase 7 (T7.1): report-contract + self-grade checks
+"Build the two keyless Phase-7 gates before writing the report." → `report/contract.py` (`audit` flags
+missing mandated sections + figures-not-embedded-inline) behind `scripts/check_report.py`, and
+`grading/score.py` (share-weighted self-grade + invariants: weights sum 100, scores 0–100, total ≤ cap)
+behind `scripts/self_grade.py`, with the rubric as data in `config/self_grade.json` (no grade numbers in
+code). Deliberately **not** wired into `make grade` yet (kept `main` green until the README exists —
+wiring deferred to T7.4). Closes a doc↔repo gap where SELF_GRADE.md cited a non-existent self_grade.py.
+TDD, fixture-tested; 174 tests @ 99%. Antigravity review hardened the validator: `math.isclose` for the
+weight-sum (float trap) + a negative-weight bound.
+
+### PR #26 — fix: perplexity figure baseline length
+"Caught during T7.2 figure review." → the perplexity-by-precision figure compared quants at *different*
+prompt lengths — `perplexity_by_quant` picked an nf4 length-sweep run (ppl 1.67 @ 256 tok) instead of the
+fixed 40-tok run (39.9), inverting the thesis. Pinned to one **global** baseline length across quants
+(Antigravity [Blocking]: a per-quant baseline could compare nf4@40 vs int8@64). RED→GREEN; corrected
+figure shows 4-bit 39.9 / 8-bit 24.2 / FP16 23.7.
+
+### PR #27 — fix: de-clutter the hierarchical roofline figure
+"The centerpiece stacked ~17 labels." → tested `prepare.roofline_runs` keeps one canonical run per
+(runner, quant, phase) at the baseline length (drops -r2 + length-sweep); points coloured by binding tier
+(the nf4 cold→warm NVMe→PCIe climb reads by colour); compact staggered leader-line labels. Antigravity
+[Blocking]: sort by exp_id inside the selector so the chart is deterministic regardless of fs order.
+
+### PR #28 — chore: remove stray patch.txt artifact
+"A UTF-16 git-diff dump was swept onto main by a `git add -A` in PR #27." → `git rm patch.txt` + added it
+to the review-scratch block in `.gitignore` (verified: no secrets/paths, referenced nowhere).
+
+### PR #29 — Phase 7 (T7.2): the README report
+"Write the graded deep-dive report." → replaced the bootstrap placeholder with the full report: badges +
+TL;DR, a leading spec-compliance table (deliverable → section → proof), thesis, hardware + model
+justification, the 5-scenario matrix + a Mermaid data-flow diagram, findings with all 7 figures embedded
+inline, theory-linking, the hierarchical-roofline extension, break-even economics + recommendation,
+two-tier reproduction, a dedicated Engineering & Reproducibility section, and foregrounded limitations +
+self-grade. Every number a function of committed `results/`+`config/`; the make-grade block quotes the
+real gate output. check_report + check_raw_data green.
+
+### PR #30 — Phase 7 (T7.3): finalize self-grade + cost ledger
+"Fill the honesty triad now the report + runs are in." → SELF_GRADE.md = **92.8/100** with per-category
+scores matching `config/self_grade.json` (the runnable scorer prints the same number — no doc↔repo gap),
+each gap mapped to a KNOWN_LIMITATIONS entry; COST.md updated to past tense with the modeled $/Mtok table
++ the never-breaks-even finding. KNOWN_LIMITATIONS (L-01…L-10) already complete.
+
+### PR #31 — docs: architecture-diagram legibility
+"The data-flow diagram rendered too small." → flipped the Mermaid from `flowchart LR` (wide → shrunk) to
+`flowchart TD` (fills the column), kept each tier as a `direction LR` subgraph, bumped font/spacing via an
+init directive. Purely a legibility fix; same content.
+
+### PR #32 — Phase 7 (T7.4): final integration gate
+"Wire the deferred gates and run the final audit." → added `check_report` + `self_grade` to the `make grade`
+target and the CI workflow (safe now that the README satisfies the contract); ticked TODO T7.1–T7.4. Full
+gate green: ruff + mypy --strict + 180 tests @ 99% + all six scanners + check_report + self_grade (92.8).
+Closes Phase 7 — the report and all gates are complete.
