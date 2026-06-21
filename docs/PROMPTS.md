@@ -190,5 +190,9 @@ is exercised end-to-end on the committed results. `check_raw_data.py` tightened 
 needs any data" to: the committed figure set must equal the expected set AND the headline scenarios
 (llamacpp-q4-warm, airllm-nf4-cold/-warm) must exist under `results/`. The break-even chart shows the
 on-prem line never dropping below the API line (never amortizes); the roofline shows decode points at
-low intensity and prefill points climbing toward the compute roof. 159 tests, mypy --strict clean
-(linux + win32). Completes Phase 6 — only the README report + final gates (Phase 7) remain.
+low intensity and prefill points climbing toward the compute roof. Antigravity review fixed three:
+[Blocking] the hardcoded API model key → `economics.json` gains `active_model` (→1.02), read by
+`build`; [Should-fix] roofline annotations collided (decode/prefill share exp_id) → annotate with
+`(phase)`; [Should-fix] hardcoded `prompt_tokens=40` + asymmetric cold/warm queries → a derived
+`_baseline_length` (min prompt length) applied symmetrically to both phases. 163 tests, mypy --strict
+clean (linux + win32). Completes Phase 6 — only the README report + final gates (Phase 7) remain.

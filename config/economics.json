@@ -1,6 +1,7 @@
 {
-  "version": "1.01",
+  "version": "1.02",
   "_note": "Phase-6 finalized constants (D6/D8: no live pricing — documented constants only, each with source + retrieved date). The API line anchors on Qwen2.5-Coder-32B-Instruct: the base Qwen2.5-32B-Instruct is not broadly hosted, so the same-size/family/generation Coder variant is the closest documented comparable (quality-parity caveat in KNOWN_LIMITATIONS).",
+  "active_model": "qwen2.5-32b",
   "api": {
     "qwen2.5-32b": {
       "input_per_mtok_usd": 0.66,

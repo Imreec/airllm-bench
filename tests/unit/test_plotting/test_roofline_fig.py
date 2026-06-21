@@ -48,3 +48,10 @@ def test_roofline_scatters_the_operating_points() -> None:
 def test_roofline_handles_no_points() -> None:
     fig = roofline_fig(_rc(), [])
     assert len(fig.axes[0].lines) == 4
+
+
+def test_point_annotations_include_the_phase() -> None:
+    # decode and prefill share an exp_id; the phase must disambiguate them.
+    fig = roofline_fig(_rc(), [_pt("llamacpp-q4-warm", 4.0, 1e10)])
+    texts = [t.get_text() for t in fig.axes[0].texts]
+    assert "llamacpp-q4-warm (decode)" in texts

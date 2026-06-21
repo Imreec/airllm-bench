@@ -78,6 +78,8 @@ class EconomicsConfig(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     version: str
+    # The API price key (in ``api``) that the report's economics lines use.
+    active_model: str
     api: dict[str, ApiRate]
     electricity: Electricity
     hardware_power: HardwarePower

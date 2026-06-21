@@ -45,7 +45,13 @@ def roofline_fig(rc: RooflineConfig, points: Sequence[OperatingPoint]) -> Figure
             zorder=3,
         )
         for p in points:
-            ax.annotate(p.exp_id, (p.intensity_flops_per_byte, p.achieved_flops), fontsize=6)
+            # exp_id alone collides: a resident run has both a prefill and a decode
+            # point — the phase disambiguates the compute-bound vs memory-bound dot.
+            ax.annotate(
+                f"{p.exp_id} ({p.phase})",
+                (p.intensity_flops_per_byte, p.achieved_flops),
+                fontsize=6,
+            )
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.legend(fontsize=8)

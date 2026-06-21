@@ -28,7 +28,6 @@ from airllm_bench.roofline.points import (
 )
 from airllm_bench.shared.config_models import RooflineConfig, SetupConfig
 
-_API_MODEL_KEY = "qwen2.5-32b"
 _VOLUMES = [1e6, 1e7, 1e8, 1e9, 1e10]
 
 
@@ -79,6 +78,6 @@ def build_figures(
     airllm = prepare.cautionary_airllm_run(results)
     if realistic and airllm and realistic.max_new_tokens:
         ratio = realistic.prompt_tokens / realistic.max_new_tokens
-        lines = build_lines(econ, _API_MODEL_KEY, realistic, airllm, ratio)
+        lines = build_lines(econ, econ.active_model, realistic, airllm, ratio)
         paths.append(save_figure(breakeven_fig(lines, _VOLUMES), out / "breakeven.png"))
     return paths

@@ -67,6 +67,17 @@ def test_cold_warm_ttft_pairs_each_quant() -> None:
     assert cw["8-bit"] == (54.3, 50.8)
 
 
+def test_cold_warm_pairs_at_a_symmetric_baseline_length() -> None:
+    # A stray long-prompt cold run must NOT be paired against the 40-token warm run:
+    # the baseline (min length) is applied to BOTH phases.
+    rows = [
+        _r("nf4-cold-256", "airllm", "nf4", "cold", prompt_tokens=256, ttft_s=99.0),
+        _r("nf4-cold-40", "airllm", "nf4", "cold", prompt_tokens=40, ttft_s=43.7),
+        _r("nf4-warm-40", "airllm", "nf4", "warm", prompt_tokens=40, ttft_s=19.3),
+    ]
+    assert cold_warm_ttft(rows)["4-bit"] == (43.7, 19.3)  # the 256-token cold is ignored
+
+
 def test_throughput_skips_runs_without_a_rate() -> None:
     tput = throughput_by_scenario(_sweep())
     assert "airllm-nf4-warm" in tput
