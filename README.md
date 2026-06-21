@@ -106,6 +106,8 @@ Scenarios 2–4 are a **within-runtime quant sweep** (same algorithm, bit-width 
 
 **How it's measured (D4/D5):** TTFT and per-token latency come from **per-token streaming timestamps**, never total ÷ count. Greedy decoding (temperature 0) for determinism. A background `ResourceSampler` thread samples NVML GPU power/VRAM + psutil RAM on one monotonic clock. **Cold vs warm** is measured with a **paired protocol**: an elevated cache flush isolates the model in the OS page cache, then the warm run repeats on the now-populated cache. GPU energy is integrated from measured NVML power; CPU energy is a declared TDP estimate.
 
+**Prove the plumbing first (the G-SPIKE).** Before committing to the expensive 32B matrix (FP16 decode is ~1.8 min/token), a throwaway go/no-go spike validated the whole stack end-to-end on a *tiny* model — the streaming-timestamp instrumentation, NVML/psutil sampling, JSON output, and **one real Qwen2.5-32B token via AirLLM, timed**. A keyless **mock-runner smoke test** exercises the same harness wiring in CI on every PR. Only once the pipeline was proven did the real runs begin — the go/no-go outcome and the locked environment are recorded in [ADR 0001](docs/adr/0001-go-no-go-spike.md).
+
 ```mermaid
 %%{init: {'theme':'neutral', 'themeVariables': {'fontSize':'18px'}, 'flowchart': {'rankSpacing': 55, 'nodeSpacing': 50}}}%%
 flowchart TD
