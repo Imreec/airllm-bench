@@ -129,8 +129,9 @@ CLI with subcommands (`bench`, `figures`, `economics`, `report-check`) over plai
 ### D10 — Perplexity as primary quality metric (FR-QUALITY)
 **Perplexity** on a fixed held-out passage (one cheap forward pass on AirLLM, *not* autoregressive),
 per quant level, **both runtimes** — gives a cross-runtime quality axis and a number for the D6
-quality-parity caveat. **Plus** a small sample-output table for the brief's literal "qualitative"
-wording. (Logits availability verified in D1.)
+quality-parity caveat. ~~**Plus** a small sample-output table for the brief's literal "qualitative"
+wording.~~ *(Descoped — the harness retains timings + perplexity, not decoded text; disclosed in
+`KNOWN_LIMITATIONS.md` L-05. Perplexity is the shipped quality axis.)* (Logits availability verified in D1.)
 
 ### D11 — Two-tier reproducibility (FR-REPRO)
 - **Tier 1 (keyless, offline, CI):** raw JSON = source of truth; **all figures regenerate from
