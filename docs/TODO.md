@@ -114,7 +114,7 @@ Shards are compression-specific (4-bit = 18 GB). **(PRD §7 resolved.)**
       cloud; break-even curves. **(D6)**
 - [x] **T6.2** `roofline/` — compute/HBM/PCIe/NVMe ceilings; operating-point placement (FP16+NF4-cold
       → NVMe, NF4-warm → PCIe/RAM); arithmetic emitted. **(D7, PR-review fix)**
-- [ ] **T6.3** `plotting/` — all figures from `results/`: TTFT-vs-length, ITL, throughput, perplexity,
+- [x] **T6.3** `plotting/` — all figures from `results/`: TTFT-vs-length, ITL, throughput, perplexity,
       break-even, hierarchical roofline. `make figures` regenerates offline. **(D11)**
 
 ---

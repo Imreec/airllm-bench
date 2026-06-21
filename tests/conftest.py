@@ -48,6 +48,7 @@ def economics_config_data() -> dict[str, Any]:
     """A complete, valid ``config/economics.json`` payload (round numbers for math)."""
     return {
         "version": "1.00",
+        "active_model": "qwen2.5-32b",
         "api": {"qwen2.5-32b": {"input_per_mtok_usd": 0.5, "output_per_mtok_usd": 1.0}},
         "electricity": {"tariff_usd_per_kwh": 0.2},
         "hardware_power": {"gpu_tdp_w": 350, "cpu_tdp_w": 100, "cpu_load_fraction": 0.5},

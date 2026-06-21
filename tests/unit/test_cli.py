@@ -88,3 +88,15 @@ def test_spawn_invokes_scenario_module(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_main_dispatches_to_bench(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(cli, "_bench", lambda args: 7)
     assert cli.main(["bench", "--experiments", "x.json"]) == 7
+
+
+def test_main_dispatches_to_figures(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_build(results: str, setup: str, econ: str, out: str) -> list[Path]:
+        captured["out"] = out
+        return [Path(out) / "roofline.png"]
+
+    monkeypatch.setattr(cli, "build_figures", fake_build)
+    assert cli.main(["figures", "--out", "figs"]) == 0
+    assert captured["out"] == "figs"

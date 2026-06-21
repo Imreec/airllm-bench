@@ -26,6 +26,17 @@ def test_token_rate_exposes_the_api_anchor(economics_config_data: dict[str, Any]
     assert rate == TokenRate(input_per_mtok=0.5, output_per_mtok=1.0)
 
 
+def test_active_model_selects_the_priced_line(economics_config_data: dict[str, Any]) -> None:
+    cfg = EconomicsConfig.model_validate({**economics_config_data, "raw_data": {}})
+    assert cfg.active_model == "qwen2.5-32b"
+    assert cfg.token_rate(cfg.active_model) == TokenRate(input_per_mtok=0.5, output_per_mtok=1.0)
+
+
+def test_committed_economics_json_active_model_is_priced() -> None:
+    cfg = EconomicsConfig.from_file(REPO_ROOT / "config" / "economics.json")
+    assert cfg.active_model in cfg.api  # the active key must have a rate
+
+
 def test_capex_usd_selects_by_scope(economics_config_data: dict[str, Any]) -> None:
     gpu = EconomicsConfig.model_validate({**economics_config_data, "raw_data": {}})
     assert gpu.capex_usd() == 1200
