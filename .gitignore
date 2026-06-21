@@ -84,5 +84,6 @@ scratch/
 
 # Cross-model PR-review scratch artifacts (never commit)
 *.diff
+patch.txt
 review_payload.json
 summary_review.md
