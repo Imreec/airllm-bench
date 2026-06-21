@@ -131,6 +131,17 @@ def test_roofline_runs_keeps_one_canonical_run_per_scenario() -> None:
     assert kept == {"airllm-nf4-cold", "airllm-nf4-warm"}  # r2 + length sweep dropped
 
 
+def test_roofline_runs_is_deterministic_regardless_of_input_order() -> None:
+    # make figures must redraw an identical chart every time: the base run (not -r2)
+    # always wins its slot, and the returned order (which drives label-offset layout)
+    # is stable — independent of filesystem globbing order.
+    base = _r("airllm-nf4-warm", "airllm", "nf4", "warm", ttft_s=19.3)
+    r2 = _r("airllm-nf4-warm-r2", "airllm", "nf4", "warm", ttft_s=19.8)
+    forward = [r.exp_id for r in roofline_runs([base, r2])]
+    reverse = [r.exp_id for r in roofline_runs([r2, base])]
+    assert forward == reverse == ["airllm-nf4-warm"]  # base beats -r2, order stable
+
+
 def test_itl_series_picks_nf4_cold_and_warm() -> None:
     rows = [
         _r("airllm-nf4-cold", "airllm", "nf4", "cold", itl_s=[3.0, 1.0]),

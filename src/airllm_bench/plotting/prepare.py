@@ -102,7 +102,10 @@ def roofline_runs(results: Sequence[RunResult]) -> list[RunResult]:
     the figure builder stays dumb and plots whatever it is handed.
     """
     canonical: dict[tuple[str, str, str], RunResult] = {}
-    for r in results:
+    # Sort by exp_id so the chart is deterministic regardless of filesystem order:
+    # the base run reliably beats its -r2 repeat into each slot, and the returned
+    # order (which drives the staggered label offsets) is stable across rebuilds.
+    for r in sorted(results, key=lambda run: run.exp_id):
         base = _baseline_length(results, r.runner, r.quant)
         if r.prompt_tokens != base:
             continue
