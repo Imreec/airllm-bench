@@ -72,7 +72,10 @@ def build_figures(
             throughput_fig(prepare.throughput_by_scenario(results)), out / "throughput.png"
         ),
         save_figure(perplexity_fig(prepare.perplexity_by_quant(results)), out / "perplexity.png"),
-        save_figure(roofline_fig(rc, _operating_points(results, rc, setup)), out / "roofline.png"),
+        save_figure(
+            roofline_fig(rc, _operating_points(prepare.roofline_runs(results), rc, setup)),
+            out / "roofline.png",
+        ),
     ]
     realistic = prepare.realistic_run(results)
     airllm = prepare.cautionary_airllm_run(results)
