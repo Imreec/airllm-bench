@@ -1,37 +1,47 @@
 {
-  "version": "1.00",
-  "_note": "All assumptions are documented constants (D8: no live pricing). Each price carries a source + retrieved date. Values are initial estimates to be finalized in Phase 6 economics.",
+  "version": "1.01",
+  "_note": "Phase-6 finalized constants (D6/D8: no live pricing — documented constants only, each with source + retrieved date). The API line anchors on Qwen2.5-Coder-32B-Instruct: the base Qwen2.5-32B-Instruct is not broadly hosted, so the same-size/family/generation Coder variant is the closest documented comparable (quality-parity caveat in KNOWN_LIMITATIONS).",
   "api": {
     "qwen2.5-32b": {
-      "input_per_mtok_usd": 0.18,
-      "output_per_mtok_usd": 0.18,
-      "source": "OpenRouter (Qwen2.5-32B-Instruct) — verify before Phase 6",
-      "retrieved": "2026-06-19"
+      "input_per_mtok_usd": 0.66,
+      "output_per_mtok_usd": 1.0,
+      "source": "OpenRouter — Qwen2.5-Coder-32B-Instruct (closest documented 32B comparable)",
+      "url": "https://openrouter.ai/qwen/qwen-2.5-coder-32b-instruct",
+      "retrieved": "2026-06-21"
     }
   },
   "electricity": {
-    "tariff_usd_per_kwh": 0.16,
-    "source": "Israel residential average — verify",
-    "retrieved": "2026-06-19"
+    "tariff_usd_per_kwh": 0.228,
+    "source": "Israel residential electricity price (ILS 0.666/kWh = USD 0.228), GlobalPetrolPrices Sep-2025",
+    "url": "https://www.globalpetrolprices.com/Israel/electricity_prices/",
+    "retrieved": "2026-06-21"
   },
   "hardware_power": {
     "gpu_tdp_w": 350,
-    "cpu_tdp_w": 105
+    "cpu_tdp_w": 105,
+    "cpu_load_fraction": 0.5,
+    "_note": "cpu_load_fraction = the share of CPU TDP actually drawn during inference, used to estimate CPU energy/token (measured results carry only GPU energy; cpu_energy_j_est is null). Distinct from utilization.duty_cycle (a lifetime-amortization knob)."
   },
   "capex": {
     "scope": "gpu_only",
     "gpu_cost_usd": 1200,
-    "amortization_years": 3
+    "whole_pc_cost_usd": 2200,
+    "amortization_years": 3,
+    "_note": "scope selects which CAPEX feeds the on-prem line (D6 exposed knob: gpu_only vs whole_pc). gpu_cost_usd = used RTX 3080 Ti; whole_pc_cost_usd = full Ryzen 9 5900X + 3080 Ti build."
   },
   "cloud_gpu": {
-    "usd_per_hour": 0.40,
-    "source": "representative rented-GPU rate — verify",
-    "retrieved": "2026-06-19"
+    "usd_per_hour": 0.24,
+    "source": "RunPod RTX 3090 (managed; closest Ampere SKU to the local 3080 Ti — no cloud 3080 Ti exists). Marketplace floor ~0.13 (vast.ai).",
+    "url": "https://www.runpod.io/pricing",
+    "retrieved": "2026-06-21"
   },
   "caching": {
-    "cached_input_discount": 0.1
+    "cached_input_discount": 0.1,
+    "cached_fraction": 0.5,
+    "_note": "cached_input_discount = fraction of the input rate billed for a cache hit (cached reads ~10% of input). cached_fraction = the share of input tokens served from cache in the API+caching line."
   },
   "utilization": {
-    "duty_cycle": 0.3
+    "duty_cycle": 0.3,
+    "_note": "the most sensitive on-prem knob (D6): fraction of wall-clock the owned box actually serves inference over its amortized life."
   }
 }
