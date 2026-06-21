@@ -66,6 +66,14 @@ def test_breakeven_volume_none_when_slopes_equal() -> None:
     assert breakeven_volume(a, b) is None
 
 
+def test_breakeven_volume_none_when_intersection_not_positive() -> None:
+    # b dominates a (higher fixed AND higher marginal) -> they only "cross" at v<0,
+    # i.e. a never becomes cheaper in feasible volume. No break-even.
+    a = Line(name="a", fixed_usd=0.0, marginal_usd_per_token=1e-6)
+    b = Line(name="b", fixed_usd=100.0, marginal_usd_per_token=2e-6)
+    assert breakeven_volume(b, a) is None
+
+
 def test_build_lines_produces_the_five_canonical_lines(
     economics_config_data: dict[str, Any],
 ) -> None:
@@ -88,3 +96,17 @@ def test_build_lines_produces_the_five_canonical_lines(
         lines["onprem_airllm"].marginal_usd_per_token
         > lines["onprem_realistic"].marginal_usd_per_token
     )
+
+
+def test_stalled_run_makes_cloud_infinitely_expensive_not_free(
+    economics_config_data: dict[str, Any],
+) -> None:
+    # A zero/None throughput must read as infinite $/token, never as $0 (free).
+    lines = build_lines(
+        _cfg(economics_config_data),
+        model_key="qwen2.5-32b",
+        realistic=_result("stalled", throughput_tok_s=None),
+        airllm=_result("airllm-nf4-warm", runner="airllm", tpot_s=20.0),
+        input_per_output_ratio=1.0,
+    )
+    assert lines["cloud"].marginal_usd_per_token == float("inf")

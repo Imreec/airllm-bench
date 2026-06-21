@@ -48,7 +48,10 @@ def breakeven_volume(a: Line, b: Line) -> float | None:
     slope_gap = b.marginal_usd_per_token - a.marginal_usd_per_token
     if slope_gap == 0:
         return None
-    return (a.fixed_usd - b.fixed_usd) / slope_gap
+    volume = (a.fixed_usd - b.fixed_usd) / slope_gap
+    # A non-positive crossing means the lines only meet at v<=0: there is no
+    # break-even in feasible (positive) volume, so report it as "never".
+    return volume if volume > 0 else None
 
 
 def _onprem_marginal(cfg: EconomicsConfig, result: RunResult) -> float:
@@ -75,10 +78,11 @@ def build_lines(
         1 - cache.cached_fraction
     ) + cache.cached_fraction * cache.cached_input_discount
     capex = cfg.capex_usd()
+    # A stalled/failed run (0 or None throughput) costs infinitely per token, not zero:
+    # guard the denominator instead of folding it into a division that would read as free.
+    tput = realistic.throughput_tok_s
     cloud_per_tok = (
-        cfg.cloud_gpu.usd_per_hour
-        / _SECONDS_PER_HOUR
-        / (realistic.throughput_tok_s or float("inf"))
+        float("inf") if not tput else cfg.cloud_gpu.usd_per_hour / _SECONDS_PER_HOUR / tput
     )
     return {
         "api": Line(

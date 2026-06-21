@@ -34,3 +34,13 @@ def test_cost_onprem_is_capex_plus_opex_per_mtok() -> None:
     opex_tok = energy_cost_usd(10.0, 0.2)
     expected = (capex_tok + opex_tok) * 1_000_000
     assert cost_onprem_per_mtok(2.0, 10.0, 0.2, 1200.0, 3.0, 0.5) == pytest.approx(expected)
+
+
+def test_zero_utilization_is_infinite_not_a_crash() -> None:
+    # An idle box (duty_cycle=0) amortizes CAPEX over zero tokens -> infinite, not ZeroDivisionError.
+    assert capex_per_token_usd(1200.0, 3.0, 0.0, 2.0) == float("inf")
+    assert cost_onprem_per_mtok(2.0, 10.0, 0.2, 1200.0, 3.0, 0.0) == float("inf")
+
+
+def test_zero_throughput_is_infinite() -> None:
+    assert capex_per_token_usd(1200.0, 3.0, 0.5, 0.0) == float("inf")

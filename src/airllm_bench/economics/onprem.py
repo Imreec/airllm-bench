@@ -26,8 +26,14 @@ def capex_per_token_usd(
     utilization: float,
     throughput_tok_s: float,
 ) -> float:
-    """CAPEX spread over the tokens the box can serve while utilized over its life."""
+    """CAPEX spread over the tokens the box can serve while utilized over its life.
+
+    An idle box (``utilization`` or ``throughput`` of 0) serves zero tokens, so its
+    per-token CAPEX is infinite — returned as such rather than dividing by zero.
+    """
     capacity_tokens = throughput_tok_s * amort_years * SECONDS_PER_YEAR * utilization
+    if capacity_tokens == 0:
+        return float("inf")
     return capex_usd / capacity_tokens
 
 
