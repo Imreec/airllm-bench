@@ -18,6 +18,10 @@ def throughput_fig(tput_by_label: Mapping[str, float]) -> Figure:
     fig, ax = new_figure("Decode throughput", "Scenario", "Tokens / s")
     labels = list(tput_by_label)
     ax.bar(labels, [tput_by_label[k] for k in labels])
+    # The scenario exp_ids are long and numerous — angle them so they don't collide
+    # into an unreadable smear above the axis. (set_xticks first to pin the locator.)
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
     return fig
 
 
